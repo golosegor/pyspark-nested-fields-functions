@@ -33,7 +33,7 @@ REQUIREMENTS = [i.strip() for i in open("requirements.txt").readlines() if i.spl
 
 
 setuptools.setup(
-    name="pyspark-nested-functions",
+    name="pyspark_nested_functions",
     version=remote_version,
     author_email="golosegor@gmail.com",
     description="Utility functions to manipulate nested structures using pyspark",
