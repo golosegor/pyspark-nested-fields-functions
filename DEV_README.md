@@ -18,14 +18,14 @@ python -m pip install --upgrade --force-reinstall -r requirements.txt
 
 ### build project
 
+# to execute junit tests
+
 ```bash
-python -m build
+python -m pytest tests/
 ```
 
-### install project
-
 ```bash
-python setup.py install --user
+python -m build
 ```
 
 ### dump dependencies periodically if dependencies changed
@@ -34,11 +34,6 @@ python setup.py install --user
 py -m pip freeze > requirements.txt
 ```
 
-# to execute junit tests
-
-```bash
-python -m pytest tests/
-```
 
 # execute linter
 
