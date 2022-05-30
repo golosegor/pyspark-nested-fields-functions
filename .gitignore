@@ -168,3 +168,4 @@ override.tf.json
 
 #vscode
 .vscode
+/nestedfunctions/VERSION
