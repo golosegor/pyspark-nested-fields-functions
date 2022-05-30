@@ -3,8 +3,6 @@ from setuptools import setup
 import subprocess
 import os
 
-# this grabs the requirements from requirements.txt
-
 remote_version = (
     subprocess.run(["git", "describe", "--tags"], stdout=subprocess.PIPE)
         .stdout.decode("utf-8")
@@ -26,6 +24,7 @@ assert os.path.isfile("nestedfunctions/version.py")
 with open("nestedfunctions/VERSION", "w", encoding="utf-8") as fh:
     fh.write(f"{remote_version}\n")
 
+# this grabs the requirements from requirements.txt
 required_libs = {"pyspark"}
 REQUIREMENTS = [i.strip() for i in open("requirements.txt").readlines() if i.split("==")[0] in required_libs]
 
@@ -35,7 +34,6 @@ setup(
     author_email="golosegor@gmail.com",
     description="Utility functions to manipulate nested structures using pyspark",
     url="https://github.com/golosegor/pyspark-nested-fields-functions",
-
     python_requires=">=3.6",
     install_requires=[
         REQUIREMENTS
