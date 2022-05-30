@@ -1,0 +1,56 @@
+### Install venv
+
+```bash
+python -m venv venv
+```
+
+### active venv
+
+```bash
+venv\Scripts\activate.bat
+```
+
+### install dependencies
+
+```bash
+python -m pip install --upgrade --force-reinstall -r requirements.txt
+```
+
+### build project
+
+```bash
+python -m build
+```
+
+### install project
+
+```bash
+python setup.py install --user
+```
+
+### dump dependencies periodically if dependencies changed
+
+```bash
+py -m pip freeze > requirements.txt
+```
+
+# to execute junit tests
+
+```bash
+python -m pytest tests/unit/
+```
+
+# to execute integration tests
+
+```bash
+python -m pytest tests/integration/
+```
+
+# execute linter
+
+```bash
+# stop the build if there are Python syntax errors or undefined names
+flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
+# exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+flake8 src/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+```
