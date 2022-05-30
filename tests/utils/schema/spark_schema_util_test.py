@@ -3,7 +3,7 @@ import logging
 import pkg_resources
 import pytest
 
-from sparkrecursive.utils.schema.schema_util import SchemaUtility
+from nestedfunctions.utils.schema.schema_util import SchemaUtility
 from tests.utils.spark_base_test import SparkBaseTest, parse_df_sample
 
 log = logging.getLogger(__name__)

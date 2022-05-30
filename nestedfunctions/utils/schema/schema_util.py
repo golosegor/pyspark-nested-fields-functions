@@ -3,7 +3,7 @@ from typing import List, Set, Union
 
 from pyspark.sql.types import StructType, ArrayType, AtomicType
 
-from sparkrecursive.utils.schema.flattener import flatten_schema
+from nestedfunctions.utils.schema.flattener import flatten_schema
 
 log = logging.getLogger(__name__)
 

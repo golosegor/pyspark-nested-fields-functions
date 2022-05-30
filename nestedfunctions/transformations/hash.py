@@ -2,7 +2,8 @@ import pyspark.sql.functions as F
 from pyspark.sql import DataFrame, Column
 from pyspark.sql.types import StringType
 
-from sparkrecursive.generic.terminal_operations import apply_terminal_operation, apply_terminal_operation_with_predicate
+from nestedfunctions.generic.terminal_operations import apply_terminal_operation, \
+    apply_terminal_operation_with_predicate
 
 DEFAULT_SALT_SEPARATOR = "¿"
 

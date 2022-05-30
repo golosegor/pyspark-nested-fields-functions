@@ -5,7 +5,7 @@ import pyspark.sql.functions as F
 from pyspark.sql import Column, DataFrame
 from pyspark.sql.types import StructType
 
-from sparkrecursive.utils.schema.schema_util import SchemaUtility
+from nestedfunctions.utils.schema.schema_util import SchemaUtility
 
 log = logging.getLogger(__name__)
 

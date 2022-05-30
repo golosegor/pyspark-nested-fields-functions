@@ -7,8 +7,8 @@ import pyspark.sql.functions as F
 from pyspark.sql import Column, DataFrame
 from pyspark.sql.types import AtomicType, StructType, StringType
 
-from sparkrecursive.generic.rec_func import RecFunc
-from sparkrecursive.utils.schema.schema_util import SchemaUtility
+from nestedfunctions.generic.rec_func import RecFunc
+from nestedfunctions.utils.schema.schema_util import SchemaUtility
 
 log = logging.getLogger(__name__)
 

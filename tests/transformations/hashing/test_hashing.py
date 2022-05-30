@@ -5,7 +5,7 @@ import pkg_resources
 import pyspark.sql.functions as F
 from pyspark.sql import DataFrame
 
-from sparkrecursive.transformations.transformations import hash_field
+from nestedfunctions.transformations.hash import hash_field
 from tests.transformations.hashing.hash_fun import hash_with_hashlib
 from tests.utils.spark_base_test import SparkBaseTest, parse_df_sample
 

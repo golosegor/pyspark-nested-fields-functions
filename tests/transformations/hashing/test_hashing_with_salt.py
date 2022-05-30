@@ -1,10 +1,9 @@
 import logging
 
 import pkg_resources
-import pytest
 from pyspark.sql import DataFrame
 
-from sparkrecursive.transformations.transformations import hash_field_with_salt, DEFAULT_SALT_SEPARATOR, \
+from nestedfunctions.transformations.hash import hash_field_with_salt, DEFAULT_SALT_SEPARATOR, \
     DEFAULT_SALT_VALUE
 from tests.transformations.hashing.hash_fun import hash_udf_str
 from tests.utils.spark_base_test import SparkBaseTest, parse_df_sample
