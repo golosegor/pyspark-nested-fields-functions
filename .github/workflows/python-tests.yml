@@ -51,4 +51,4 @@ jobs:
     - name: Install
       run: |
         python setup.py sdist bdist_wheel
-        pip install dist/pyspark-nested-functions-*.whl
+        pip install dist/pyspark_nested_functions-*.whl
