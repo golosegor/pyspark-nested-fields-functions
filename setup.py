@@ -1,4 +1,5 @@
-from setuptools import setup, find_packages
+import setuptools
+from setuptools import setup
 import subprocess
 import os
 
@@ -30,22 +31,20 @@ required_libs = {"pyspark"}
 REQUIREMENTS = [i.strip() for i in open("requirements.txt").readlines() if i.split("==")[0] in required_libs]
 
 
+
 setup(
-    name='recursive_utils',
+    name='pyspark_nested_fields_functions',
     version=remote_version,
-    include_package_data=True,
     author_email="golosegor@gmail.com",
     description="Utility functions to manipulate nested structures using pyspark",
     url="https://github.com/golosegor/pyspark-nested-fields-functions",
-    package_data={
-        "": ["*.json"],
-    },
+
     python_requires=">=3.6",
     install_requires=[
         REQUIREMENTS
     ],
-    packages=find_packages(
-        where='nestedfunctions'
-    ),
+    package_data={"nestedfunctions": ["VERSION"]},
+    packages=setuptools.find_packages(),
+    include_package_data=True,
     package_dir={"": "nestedfunctions"}
 )

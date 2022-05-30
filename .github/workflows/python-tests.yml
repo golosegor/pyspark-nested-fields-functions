@@ -49,4 +49,4 @@ jobs:
     - name: Install
       run: |
         python setup.py sdist bdist_wheel
-        pip install dist/cf_remote-*.whl
+        pip install dist/pyspark_nested_fields_functions-*.whl
