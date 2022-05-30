@@ -1,0 +1,16 @@
+[
+  {
+    "data": {
+      "city": {
+        "addresses": [
+          {
+            "id": "my-id"
+          },
+          {
+            "id": "my-id2"
+          }
+        ]
+      }
+    }
+  }
+]

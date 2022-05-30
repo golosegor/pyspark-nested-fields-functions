@@ -1,0 +1,14 @@
+[
+  {
+    "customDimensions": [
+      {
+        "index": 13,
+        "value": "SUPER_SECRET_VALUE"
+      },
+      {
+        "index": 2,
+        "value": "normal-value"
+      }
+    ]
+  }
+]

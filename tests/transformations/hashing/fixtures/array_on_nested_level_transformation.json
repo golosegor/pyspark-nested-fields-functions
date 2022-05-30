@@ -1,0 +1,19 @@
+[
+  {
+    "hits": [
+      {
+        "id": 55,
+        "custom dimensions": [
+          {
+            "index": 13,
+            "value": "SUPER_SECRET_VALUE"
+          },
+          {
+            "index": 2,
+            "value": "normal-value"
+          }
+        ]
+      }
+    ]
+  }
+]

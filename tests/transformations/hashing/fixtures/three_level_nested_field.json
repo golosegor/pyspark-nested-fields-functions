@@ -1,0 +1,12 @@
+[
+  {
+    "data": {
+      "city": {
+        "address": {
+          "name": "whatever",
+          "id": "data-to-hash"
+        }
+      }
+    }
+  }
+]
