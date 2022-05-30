@@ -1,0 +1,22 @@
+[
+  {
+    "root-element": 5,
+    "root-element-array-primitive": [
+      "v1",
+      "v2"
+    ],
+    "root-element-array-of-structs": [
+      {
+        "d1": {
+          "d2": "ignored"
+        }
+      }
+    ],
+    "nested-structure": {
+      "n1": "ff",
+      "d1": {
+        "d2": "ignored"
+      }
+    }
+  }
+]

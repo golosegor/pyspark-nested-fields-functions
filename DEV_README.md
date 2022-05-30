@@ -37,13 +37,7 @@ py -m pip freeze > requirements.txt
 # to execute junit tests
 
 ```bash
-python -m pytest tests/unit/
-```
-
-# to execute integration tests
-
-```bash
-python -m pytest tests/integration/
+python -m pytest tests/
 ```
 
 # execute linter

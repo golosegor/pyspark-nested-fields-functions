@@ -1,0 +1,34 @@
+[
+  {
+    "root-field-primitive-array": [
+      "v1"
+    ],
+    "root-field-array": [
+      {
+        "one-level-nested-array": [
+          {
+            "id": "my-id"
+          },
+          {
+            "id": "my-id2"
+          }
+        ]
+      }
+    ],
+    "root-field": {
+      "one-level-nested": {
+        "two-level-nested": {
+          "three-level-nested": "whatever"
+        }
+      },
+      "array-field": [
+        {
+          "id": "my-id"
+        },
+        {
+          "id": "my-id2"
+        }
+      ]
+    }
+  }
+]

@@ -1,7 +1,6 @@
 from typing import Callable
 
-from pyspark.pandas import DataFrame
-from pyspark.sql import Column
+from pyspark.sql import Column, DataFrame
 from pyspark.sql.types import AtomicType
 
 
