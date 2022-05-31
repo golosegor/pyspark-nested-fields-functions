@@ -1,0 +1,12 @@
+{
+  "UID": "whatever",
+  "emails": {
+    "unverified": [
+      "egorka@gmail.com\t",
+      "juan-miguel@gmail.com\t"
+    ],
+    "verified": [
+      "fuat@gmail.com\t"
+    ]
+  }
+}
