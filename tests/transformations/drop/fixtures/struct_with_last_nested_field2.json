@@ -1,0 +1,10 @@
+[
+  {
+    "userId": 1,
+    "nested": {
+      "home_id": {
+        "value": "whatever"
+      }
+    }
+  }
+]

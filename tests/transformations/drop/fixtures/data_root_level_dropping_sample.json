@@ -1,0 +1,26 @@
+[
+  {
+    "userId": 1,
+    "username": "Bill",
+    "home": {
+      "home_id": 1,
+      "address": "USA",
+      "feature": {
+        "feature1": 1,
+        "feature2": 2
+      }
+    }
+  },
+  {
+    "userId": 2,
+    "username": "Jeff",
+    "home": {
+      "home_id": 2,
+      "address": "UK",
+      "feature": {
+        "feature1": 1,
+        "feature2": 2
+      }
+    }
+  }
+]

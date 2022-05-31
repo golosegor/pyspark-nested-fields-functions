@@ -1,0 +1,19 @@
+[
+  {
+    "creditCard": "123456",
+    "addresses": [
+      {
+        "zipCode": "654321",
+        "flats": [
+          {
+            "escalera": 1
+          },
+          {
+            "escalera": 2
+          }
+        ]
+      }
+    ]
+  }
+]
+
