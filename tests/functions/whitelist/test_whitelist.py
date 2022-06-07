@@ -5,8 +5,7 @@ import pkg_resources
 from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType, StructField, StringType, ArrayType, LongType
 
-from nestedfunctions.functions.whitelist import whitelist
-from nestedfunctions.processors.whitelist.whitelist_processor import filter_only_parents_fields
+from nestedfunctions.functions.whitelist import whitelist, filter_only_parents_fields
 from tests.functions.spark_base_test import SparkBaseTest
 from tests.utils.testing_utils import parse_df_sample
 
