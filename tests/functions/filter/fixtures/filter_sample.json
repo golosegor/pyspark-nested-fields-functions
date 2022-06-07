@@ -1,0 +1,12 @@
+[
+  {
+    "userId": 1,
+    "isActive": true,
+    "CRY_DSC": "GB"
+  },
+  {
+    "userId": 2,
+    "isActive": false,
+    "CRY_DSC": "other-value"
+  }
+]

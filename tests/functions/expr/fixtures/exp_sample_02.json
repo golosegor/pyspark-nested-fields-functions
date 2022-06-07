@@ -1,0 +1,18 @@
+[
+  {
+    "email": " Fuat@hotmail.com\t",
+    "isActive": true
+  },
+  {
+    "email": "test Egor@hotmail.com\n",
+    "isActive": true
+  },
+  {
+    "email": "fuat@hotmail.com",
+    "isActive": true
+  },
+  {
+    "email": "egor@hotmail.com",
+    "isActive": true
+  }
+]

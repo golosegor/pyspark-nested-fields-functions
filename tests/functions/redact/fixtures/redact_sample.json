@@ -1,0 +1,16 @@
+[
+  {
+    "root level string": "yo",
+    "root-level-number": 1.123521322,
+    "customDimensions": [
+      {
+        "Metabolics Conditions": 13,
+        "value": "value1"
+      },
+      {
+        "Metabolics Conditions": 2,
+        "value": "value2"
+      }
+    ]
+  }
+]

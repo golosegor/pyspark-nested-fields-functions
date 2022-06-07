@@ -1,0 +1,17 @@
+[
+  {
+    "root field name with space": [
+      {
+        "id": "omgid",
+        "custom dimensions with space": [
+          {
+            "nested value in the array with space": 13
+          },
+          {
+            "nested value in the array with space": 15
+          }
+        ]
+      }
+    ]
+  }
+]

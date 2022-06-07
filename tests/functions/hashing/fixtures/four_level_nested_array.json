@@ -1,0 +1,27 @@
+{
+  "results": [
+    {
+      "shippingInfo": {
+        "deliveries": [
+          {
+            "id": "1bc532e1-7e04-4ef8-83f4-e0b32815bef9",
+            "createdAt": "2021-09-09T15:01:46.384Z",
+            "items": [],
+            "parcels": [
+              {
+                "id": "d859c0a3-1bba-43c3-98d7-3a29776faba9",
+                "createdAt": "2021-09-09T15:01:46.384Z",
+                "trackingData": {
+                  "trackingId": "https://www.dhl.de/de/privatkunden/pakete-empfangen/verfolgen.html?lang=de&idc=00340434462561258861",
+                  "providerTransaction": "00340434462561258861",
+                  "isReturn": false
+                },
+                "items": []
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

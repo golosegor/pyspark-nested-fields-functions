@@ -1,0 +1,25 @@
+{
+  "field1": "any",
+  "results": [
+    {
+      "lineItems": [
+        {
+          "variant": {
+            "availability": {
+              "channels": {
+                "f0e50850-532d-4066-b5c0-b29c5577105a": {
+                  "isOnStock": true,
+                  "availableQuantity": 1
+                },
+                "c390e83d-1f92-4b0b-a04c-f486e92eca9a": {
+                  "isOnStock": true,
+                  "availableQuantity": 1
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

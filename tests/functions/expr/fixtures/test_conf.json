@@ -1,0 +1,18 @@
+{
+  "gigya": [
+    {
+      "factory_name": "expr",
+      "params": {
+        "field": "email",
+        "format_out": "lower(regexp_extract(email, '(\\\\S+@\\\\S+)', 1))"
+      }
+    },
+    {
+      "factory_name": "hash",
+      "params": {
+        "field": "email"
+      }
+    }
+  ]
+}
+
