@@ -2,8 +2,7 @@ import logging
 
 import pkg_resources
 
-from nestedfunctions.functions.field_rename import rename_with_strategy
-from nestedfunctions.processors.field_rename.field_rename_processor import FieldRenameFunc
+from nestedfunctions.functions.field_rename import rename_with_strategy, FieldRenameFunc
 from nestedfunctions.spark_schema.utility import SparkSchemaUtility
 from tests.functions.spark_base_test import SparkBaseTest
 from tests.utils.testing_utils import parse_df_sample

@@ -1,6 +1,6 @@
 import unittest
 
-from nestedfunctions.processors.field_rename.parquet.parquet_compliance_field_rename_pf import ParquetComplianceFn
+from nestedfunctions.functions.field_rename import ParquetComplianceFn
 
 
 class ParquetComplianceFnTest(unittest.TestCase):
