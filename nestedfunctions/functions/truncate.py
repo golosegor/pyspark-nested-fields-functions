@@ -1,16 +1,15 @@
 import pyspark.sql.functions as F
 from pyspark.sql import Column
 from pyspark.sql import DataFrame
-from pyspark.sql.types import AtomicType
 
 from nestedfunctions.functions.terminal_operations import apply_terminal_operation
 
 
 def truncate(df: DataFrame, field: str, character_size: int) -> DataFrame:
-    return apply_terminal_operation(df, field, lambda c, t: __truncate(c, t, character_size))
+    return apply_terminal_operation(df, field, lambda c, t: __truncate(c, character_size))
 
 
-def __truncate(primitive_value: Column, fieldType: AtomicType, character_size: int) -> Column:
+def __truncate(primitive_value: Column, character_size: int) -> Column:
     if character_size < 0:
         # it is not possible to obtain 'size' of primitive values from the array, so this workaround is mandatory
         # the easiest way would be
