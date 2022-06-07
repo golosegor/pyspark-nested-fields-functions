@@ -6,9 +6,7 @@ import pytest
 from pyspark.sql import DataFrame
 from pyspark.sql.types import StringType
 
-from nestedfunctions.functions.redact import redact
-from nestedfunctions.processors.redact.redact_processor import SPARK_TYPE_TO_REDACT_VALUE, \
-    column_name_with_dedicated_field_type
+from nestedfunctions.functions.redact import redact, SPARK_TYPE_TO_REDACT_VALUE, column_name_with_dedicated_field_type
 from nestedfunctions.utils.iterators.iterator_utils import flatten
 from tests.functions.spark_base_test import SparkBaseTest
 from tests.utils.testing_utils import parse_df_sample
