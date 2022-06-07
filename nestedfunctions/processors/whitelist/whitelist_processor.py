@@ -6,8 +6,8 @@ from typing import List, Set
 from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
 
+from nestedfunctions.functions.drop import drop
 from nestedfunctions.processors.coreprocessor import CoreProcessor
-from nestedfunctions.processors.dropping.drop_processor import DropProcessor
 from nestedfunctions.spark_schema.utility import SparkSchemaUtility
 from nestedfunctions.utils.iterators.iterator_utils import distinct
 
@@ -52,7 +52,7 @@ class WhitelistProcessor(CoreProcessor):
     @staticmethod
     def drop_fields(df: DataFrame, fields_to_drop: Set[str]) -> DataFrame:
         for idx, field_to_drop in enumerate(fields_to_drop):
-            df = DropProcessor(field_to_drop).process(df)
+            df = drop(df, field_to_drop)
             if (idx + 1) % NUMBER_OF_ITERATIONS_TO_FORCE_CATALYST_FLUSH == 0:
                 log.debug("Dropping: time to force calculation")
                 df = force_calculation(df)
