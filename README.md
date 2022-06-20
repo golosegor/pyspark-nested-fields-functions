@@ -6,7 +6,7 @@
 ## Motivation
 
 Applying transformations for nested structures in spark is tricky.
-Assuming we have 3 level nested field below:
+Assuming we have JSON data with highly nested structure:
 
 ```json
 [
