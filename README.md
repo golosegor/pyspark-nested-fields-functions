@@ -71,7 +71,7 @@ Preserving all fields listed in parameters. All other parameters will be dropped
 ```python
 from nestedfunctions.functions.whitelist import whitelist
 
-whitelist(df, ["addresses.postalCode", "creditCard"]) 
+whitelisted_df = whitelist(df, ["addresses.postalCode", "creditCard"]) 
 ```
 
 #### Drop
