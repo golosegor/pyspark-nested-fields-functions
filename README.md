@@ -81,7 +81,7 @@ Recursively drop fields and on any nested level (including child's elements)
 ```python
 from nestedfunctions.functions.drop import drop
 
-drop(df, field="root_level.children1.children2")
+processed = drop(df, field="root_level.children1.children2")
 ```
 
 ### Flattener
