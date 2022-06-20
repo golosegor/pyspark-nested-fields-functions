@@ -66,7 +66,7 @@ $ pip install pyspark-nested-functions
 
 #### Whitelist
 
-Preserving all fields listed in parameters. All other parameters will be dropped
+Preserving all fields listed in parameters. All other fields will be dropped
 
 ```python
 from nestedfunctions.functions.whitelist import whitelist
@@ -76,7 +76,7 @@ whitelisted_df = whitelist(df, ["addresses.postalCode", "creditCard"])
 
 #### Drop
 
-Recursively drop fields and on any nested level (including child's elements)
+Recursively drop fields on any nested level (including child)
 
 ```python
 from nestedfunctions.functions.drop import drop
