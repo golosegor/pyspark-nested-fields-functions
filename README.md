@@ -41,7 +41,7 @@ hashed = df.withColumn("data",
                                                                                                     256)))))))
 ```
 
-With the framework the code above could be simplified to
+With the library the code above could be simplified to
 
 ```python
 import pyspark.sql.functions as F
