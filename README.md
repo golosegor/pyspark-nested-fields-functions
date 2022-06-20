@@ -108,3 +108,7 @@ from nestedfunctions.functions.nullify import nullify
 
 processed = nullify(df, field="creditCard.id")
 ```
+
+## License
+
+[Apache License 2.0](LICENSE)
