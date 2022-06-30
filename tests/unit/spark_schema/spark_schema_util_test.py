@@ -4,12 +4,12 @@ import pkg_resources
 import pytest
 
 from nestedfunctions.spark_schema.utility import SparkSchemaUtility
-from tests.functions.spark_base_test import SparkBaseTest
-from tests.utils.testing_utils import parse_df_sample
+from tests.unit.functions.spark_base_test import SparkBaseTest
+from tests.unit.utils.testing_utils import parse_df_sample
 
 log = logging.getLogger(__name__)
 
-logging.getLogger('nestedfunctions.utils.spark.schema.schema_flattener').setLevel(logging.DEBUG)
+logging.getLogger('metadata_core.utils.spark.schema.schema_flattener').setLevel(logging.DEBUG)
 
 
 class SparkSchemaUtilityTest(SparkBaseTest):

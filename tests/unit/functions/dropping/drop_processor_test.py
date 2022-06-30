@@ -10,8 +10,8 @@ from pyspark.sql import DataFrame
 from nestedfunctions.functions.drop import drop
 from nestedfunctions.processors.coreprocessor import CoreProcessor
 from nestedfunctions.spark_schema.utility import SparkSchemaUtility
-from tests.functions.spark_base_test import SparkBaseTest
-from tests.utils.testing_utils import parse_df_sample
+from tests.unit.functions.spark_base_test import SparkBaseTest
+from tests.unit.utils.testing_utils import parse_df_sample
 
 log = logging.getLogger(__name__)
 

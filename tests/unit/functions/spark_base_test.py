@@ -4,6 +4,8 @@ import pytest
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
 
+from nestedfunctions.functions.whitelist import SPARK_ENABLED_FORCE_RECALCULATION_ENV_VARIABLE_NAME
+
 
 class SparkBaseTest(unittest.TestCase):
 
@@ -12,6 +14,8 @@ class SparkBaseTest(unittest.TestCase):
 
     @pytest.fixture(autouse=True)
     def setup(self):
+        import os
+        os.environ[SPARK_ENABLED_FORCE_RECALCULATION_ENV_VARIABLE_NAME] = str(True)
         conf = (SparkConf()
                 # .set("spark.sql.legacy.timeParserPolicy", "LEGACY")
                 )

@@ -2,8 +2,8 @@ import pkg_resources
 import pytest
 
 from nestedfunctions.functions.binary_generalization import binary_generalization
-from tests.functions.spark_base_test import SparkBaseTest
-from tests.utils.testing_utils import parse_df_sample
+from tests.unit.functions.spark_base_test import SparkBaseTest
+from tests.unit.utils.testing_utils import parse_df_sample
 
 
 class BinaryGeneralizationProcessorTest(SparkBaseTest):

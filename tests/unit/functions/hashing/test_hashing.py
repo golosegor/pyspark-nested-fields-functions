@@ -7,9 +7,9 @@ import pytest
 from pyspark.sql import DataFrame
 
 from nestedfunctions.functions.hash import hash_field, hash_field_with_predicate
-from tests.functions.hashing.hash_fun import hash_udf
-from tests.functions.spark_base_test import SparkBaseTest
-from tests.utils.testing_utils import parse_df_sample
+from tests.unit.functions.hashing.hash_fun import hash_udf
+from tests.unit.functions.spark_base_test import SparkBaseTest
+from tests.unit.utils.testing_utils import parse_df_sample
 
 log = logging.getLogger(__name__)
 
