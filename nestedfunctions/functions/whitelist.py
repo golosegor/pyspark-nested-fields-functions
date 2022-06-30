@@ -4,12 +4,10 @@ import os
 from typing import List, Set
 
 from pyspark.sql import DataFrame
-from pyspark.sql.types import StructType
 
 from nestedfunctions.functions.drop import drop
 from nestedfunctions.processors.coreprocessor import CoreProcessor
 from nestedfunctions.spark_schema.utility import SparkSchemaUtility
-from nestedfunctions.utils.iterators.iterator_utils import distinct
 
 
 def whitelist(df: DataFrame, fields: List[str]) -> DataFrame:
@@ -21,6 +19,7 @@ log = logging.getLogger(__name__)
 # https://issues.apache.org/jira/browse/SPARK-28090
 # Spark hangs when an execution plan has many projections on nested structs
 NUMBER_OF_ITERATIONS_TO_FORCE_CATALYST_FLUSH = 10
+SPARK_ENABLED_FORCE_RECALCULATION_ENV_VARIABLE_NAME = "SPARK_FORCE_RECALCULATION_ENABLED"
 
 
 class WhitelistProcessor(CoreProcessor):
@@ -42,16 +41,18 @@ class WhitelistProcessor(CoreProcessor):
                 f"No fields to select {self.whitelist_columns}. No intersections with {self.schema_util.flatten_schema(df.schema)}. "
                 f"Returning empty df.")
             return df.limit(0)
-        fields_to_drop = self.find_fields_to_drop(df)
+        fields_to_drop = WhitelistProcessor.find_fields_to_drop(
+            flattened_fields=set(SparkSchemaUtility().flatten_schema(df.schema)),
+            whitelist=set(self.whitelist_columns))
         log.debug(f"Fields to drop {fields_to_drop}")
         return self.drop_fields(df, fields_to_drop)
 
-    def find_fields_to_drop(self, df: DataFrame) -> Set[str]:
-        only_existing_columns = self.__filter_only_existing_fields(df.schema, self.whitelist_columns)
-        whitelist_parent_fields = set(filter_only_parents_fields(only_existing_columns))
-        all_fields = SparkSchemaUtility().flatten_schema(df.schema)
-        fields_to_drop = {field for field in all_fields if
-                          self.is_field_need_to_be_dropped(field, whitelist_parent_fields)}
+    @staticmethod
+    def find_fields_to_drop(flattened_fields: Set[str], whitelist: Set[str]) -> Set[str]:
+        whitelist_parent_fields = set(filter_only_parents_fields(list(whitelist)))
+        fields_to_drop = {field for field in flattened_fields if
+                          WhitelistProcessor.is_field_need_to_be_dropped(field=field,
+                                                                         whitelist_fields=whitelist_parent_fields)}
         return fields_to_drop
 
     @staticmethod
@@ -64,22 +65,13 @@ class WhitelistProcessor(CoreProcessor):
         return df
 
     @staticmethod
-    def is_field_need_to_be_dropped(field: str, parent_fields: Set[str]) -> bool:
-        for parent_field in parent_fields:
-            if parent_field in field:
+    def is_field_need_to_be_dropped(field: str, whitelist_fields: Set[str]) -> bool:
+        if field in whitelist_fields:
+            return False
+        for parent_field in whitelist_fields:
+            if field.startswith(f'{parent_field}.'):
                 return False
         return True
-
-    @staticmethod
-    def __filter_only_existing_fields(schema: StructType, fields: List[str]) -> List[str]:
-        schema_util = SparkSchemaUtility()
-        res = []
-        for field in distinct(fields):
-            if schema_util.is_column_exist(schema, field):
-                res.append(field)
-            else:
-                logging.warning(f"Field {field} is not found")
-        return res
 
     def no_fields_to_select(self, df: DataFrame) -> bool:
         flattened_fields = set(self.schema_util.flatten_schema(df.schema))
@@ -91,8 +83,10 @@ class WhitelistProcessor(CoreProcessor):
 
 def filter_only_parents_fields(fields: List[str]) -> List[str]:
     combinations = itertools.combinations(fields, 2)
-    common_elements = {os.path.commonprefix([c1, c2]) for (c1, c2) in combinations if
-                       os.path.commonprefix([c1, c2]) != ""}
+    complex_structure_separator = "."
+    common_elements = {os.path.commonprefix([c1, c2]) for (c1, c2) in combinations
+                       if (complex_structure_separator in c1 or complex_structure_separator in c2)
+                       and os.path.commonprefix([c1, c2]) != ""}
     root_elements = {f for f in fields if f in common_elements}
     if len(root_elements) != 0:
         logging.warning(f"Root elements found {root_elements}. Be careful!! Child elements will be ignored!")
@@ -120,4 +114,8 @@ def __replace_elements_with_root(fields: List[str], root: str) -> List[str]:
 
 
 def force_calculation(df: DataFrame) -> DataFrame:
-    return df.cache()
+    spark_force_calculation_enabled = os.environ.get(SPARK_ENABLED_FORCE_RECALCULATION_ENV_VARIABLE_NAME)
+    if spark_force_calculation_enabled is not None and spark_force_calculation_enabled.lower().strip() == "true":
+        return df.cache()
+    else:
+        return df

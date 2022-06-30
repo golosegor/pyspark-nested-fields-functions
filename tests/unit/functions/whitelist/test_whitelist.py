@@ -5,12 +5,12 @@ import pkg_resources
 from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType, StructField, StringType, ArrayType, LongType
 
-from nestedfunctions.functions.whitelist import whitelist, filter_only_parents_fields
-from tests.functions.spark_base_test import SparkBaseTest
-from tests.utils.testing_utils import parse_df_sample
+from nestedfunctions.functions.whitelist import whitelist, filter_only_parents_fields, WhitelistProcessor
+from tests.unit.functions.spark_base_test import SparkBaseTest
+from tests.unit.utils.testing_utils import parse_df_sample
 
-logging.getLogger('nestedfunctions.processors.generic').setLevel(logging.DEBUG)
-logging.getLogger('nestedfunctions.processors.dropping').setLevel(logging.DEBUG)
+logging.getLogger('metadata_core.processors.generic').setLevel(logging.DEBUG)
+logging.getLogger('metadata_core.processors.dropping').setLevel(logging.DEBUG)
 
 
 class WhitelistTest(SparkBaseTest):
@@ -18,7 +18,10 @@ class WhitelistTest(SparkBaseTest):
     def test_whitelist_select_only_common_element_integration(self):
         df = parse_df_sample(self.spark,
                              pkg_resources.resource_filename(__name__, "fixtures/white-list-sample.json"))
-        processed = whitelist(df, ["addresses.postalCode", "addresses.postalCode", "addresses", "non-existing",
+        processed = whitelist(df, ["addresses.postalCode",
+                                   "addresses.postalCode",
+                                   "addresses",
+                                   "non-existing",
                                    "creditCard"])
         self.assertEqual(df.collect(), processed.collect())
 
@@ -52,6 +55,14 @@ class WhitelistTest(SparkBaseTest):
     def test_whitelist_select_only_common_element_t2(self):
         filtered = filter_only_parents_fields(["element1"])
         self.assertEqual(["element1"], filtered)
+
+    def test_whitelist_select_only_common_element_gigya_bug(self):
+        whitelist = {
+            'lastUpdated',
+            'lastUpdatedTimestamp',
+        }
+        parents_only = filter_only_parents_fields(list(whitelist))
+        self.assertEqual(whitelist, set(parents_only))
 
     def test_whitelist_ignored_unknown_fields(self):
         def parse_data(df: DataFrame) -> str:
@@ -96,3 +107,66 @@ class WhitelistTest(SparkBaseTest):
         self.assertEqual({"field1", "results"}, set(df.schema.names))
         processed = whitelist(df, ["field1"])
         self.assertEqual({"field1"}, set(processed.schema.names))
+
+    def test_whitelist_is_working_properly(self):
+        df = parse_df_sample(self.spark,
+                             pkg_resources.resource_filename(__name__,
+                                                             "fixtures/whitelist-input.json"))
+        self.assertEqual({
+            "UID",
+            "created",
+            "identities",
+        }, set(df.schema.names))
+        processed = whitelist(df, ["UID", "created"])
+        self.assertEqual({"UID", "created"}, set(processed.schema.names))
+
+    def test_fields_to_delete_found_correctly(self):
+        fields_to_drop = WhitelistProcessor.find_fields_to_drop(
+            flattened_fields={"UID", "created", "identities.providerUID"},
+            whitelist={"UID", "created"})
+        self.assertEqual({"identities.providerUID"}, fields_to_drop)
+
+    def test_fields_to_delete_found_correctly2(self):
+        fields_to_drop = WhitelistProcessor.find_fields_to_drop(
+            flattened_fields={
+                "creditCard",
+                "addresses.postalCode",
+                "addresses.flats.escalera",
+                "addresses.flats.piso",
+                "addresses.zipCode"},
+            whitelist={"addresses.postalCode",
+                       "addresses.postalCode",
+                       "addresses",
+                       "non-existing",
+                       "creditCard"})
+        self.assertEqual(set(), fields_to_drop)
+
+    def all_fields_are_about_to_drop(self):
+        fields_to_drop = WhitelistProcessor.find_fields_to_drop(
+            flattened_fields={
+                "creditCard",
+                "addresses.postalCode",
+                "addresses.flats.escalera",
+                "addresses.flats.piso",
+                "addresses.zipCode"},
+            whitelist={"addresses.postalCode",
+                       "addresses.postalCode",
+                       "addresses",
+                       "non-existing",
+                       "creditCard"})
+        self.assertEqual(set(), fields_to_drop)
+
+    def test_gigya_scenario(self):
+        fields_to_drop = WhitelistProcessor.find_fields_to_drop(
+            flattened_fields={
+                "creditCard",
+                "addresses.postalCode",
+                "addresses.flats.escalera",
+                "addresses.flats.piso",
+                "addresses.zipCode"},
+            whitelist={"addresses.postalCode",
+                       "addresses.postalCode",
+                       "addresses",
+                       "non-existing",
+                       "creditCard"})
+        self.assertEqual(set(), fields_to_drop)
