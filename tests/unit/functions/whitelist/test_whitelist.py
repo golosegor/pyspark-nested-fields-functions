@@ -170,3 +170,13 @@ class WhitelistTest(SparkBaseTest):
                        "non-existing",
                        "creditCard"})
         self.assertEqual(set(), fields_to_drop)
+
+    def test_ga_scenario(self):
+        fields = {'hits.page.pagePathLevel1'}
+        whitelist = {
+            "hits.page.hostname",
+            "hits.page.pagePath",
+            "hits.page.pagePathLevel1"
+        }
+        fields_to_drop = WhitelistProcessor.find_fields_to_drop(flattened_fields=fields, whitelist=whitelist)
+        self.assertFalse("hits.page.pagePathLevel1" in fields_to_drop)

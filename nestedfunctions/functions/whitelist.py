@@ -83,10 +83,11 @@ class WhitelistProcessor(CoreProcessor):
 
 def filter_only_parents_fields(fields: List[str]) -> List[str]:
     combinations = itertools.combinations(fields, 2)
-    complex_structure_separator = "."
+    sep = "."
     common_elements = {os.path.commonprefix([c1, c2]) for (c1, c2) in combinations
-                       if (complex_structure_separator in c1 or complex_structure_separator in c2)
-                       and os.path.commonprefix([c1, c2]) != ""}
+                       if os.path.commonprefix([c1, c2]) != ""
+                       and (c2.startswith(f"{c1}{sep}") or c1.startswith(f"{c2}{sep}"))
+                       }
     root_elements = {f for f in fields if f in common_elements}
     if len(root_elements) != 0:
         logging.warning(f"Root elements found {root_elements}. Be careful!! Child elements will be ignored!")
