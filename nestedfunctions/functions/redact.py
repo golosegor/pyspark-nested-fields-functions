@@ -68,7 +68,8 @@ class RedactProcessor(TerminalOperationProcessor):
 
     def transform_primitive(self, primitive_value: Column, fieldType: AtomicType) -> Column:
         try:
-            return column_name_with_dedicated_field_type(fieldType)
+            return F.when(F.isnull(primitive_value), primitive_value) \
+                .otherwise(column_name_with_dedicated_field_type(fieldType))
         except KeyError:
             raise Exception(
                 f'Unknown type {fieldType.simpleString()} for field {self.column_to_process}. '

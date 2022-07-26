@@ -16,6 +16,14 @@ logging.getLogger(__name__).setLevel(logging.INFO)
 
 
 class RedactTest(SparkBaseTest):
+    def test_redact_root_level_preserve_null(self):
+        def parse_data(df: DataFrame) -> List[str]:
+            return [d[0] for d in df.select("root level with null").collect()]
+
+        df = self.parse_df()
+        self.assertEqual([None], parse_data(df))
+        processed = redact(df, field="root level with null")
+        self.assertEqual([None], parse_data(processed))
 
     def test_redact_root_level(self):
         def parse_data(df: DataFrame) -> List[str]:
@@ -36,6 +44,18 @@ class RedactTest(SparkBaseTest):
         primitive_value_type = df.schema["customDimensions"].dataType.elementType['Metabolics Conditions'].dataType
         expected_value = SPARK_TYPE_TO_REDACT_VALUE[primitive_value_type]
         self.assertEqual([expected_value, expected_value], flatten(parse_data(processed)))
+
+
+    def test_redact_nested_structure_null_value_preserved(self):
+        def parse_data(df_to_extract: DataFrame) -> List[str]:
+            return [d[0] for d in df_to_extract.select("customDimensions.null value in nested").collect()]
+
+        df = self.parse_df()
+        self.assertEqual([None, 5], flatten(parse_data(df)))
+        processed = redact(df, field="customDimensions.null value in nested")
+        primitive_value_type = df.schema["customDimensions"].dataType.elementType['null value in nested'].dataType
+        expected_value = SPARK_TYPE_TO_REDACT_VALUE[primitive_value_type]
+        self.assertEqual([None, expected_value], flatten(parse_data(processed)))
 
     def test_redact_throws_exception_if_field_is_not_primitive(self):
         df = self.parse_df()

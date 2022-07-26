@@ -1,14 +1,17 @@
 [
   {
     "root level string": "yo",
+    "root level with null": null,
     "root-level-number": 1.123521322,
     "customDimensions": [
       {
         "Metabolics Conditions": 13,
+        "null value in nested": null,
         "value": "value1"
       },
       {
         "Metabolics Conditions": 2,
+        "null value in nested": 5,
         "value": "value2"
       }
     ]
