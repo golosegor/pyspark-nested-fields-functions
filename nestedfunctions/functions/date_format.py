@@ -27,5 +27,14 @@ def format_date_with_predicate(df: DataFrame,
 
 
 def __format_date(primitive_column: Column, current_date_format: str, target_date_format: str) -> Column:
-    date = F.to_timestamp(primitive_column.cast(StringType()), current_date_format)
-    return F.date_format(date, target_date_format).cast(StringType())
+    """
+        Function to do dateformatting
+        | if the source value is null -> preserve the null by casting it to 'string' type
+        | if source value is NOT null and input dataformat pattern is matching provided current_date_format -> do format
+        | if source value is NOT null and input dataformat pattern is NOT matching our rules -> throw exception
+    """
+    date_as_ts = F.to_timestamp(primitive_column.cast(StringType()), current_date_format)
+    return F.when(F.isnull(primitive_column), primitive_column.cast(StringType())) \
+        .otherwise((F.when(F.isnull(date_as_ts), F.raise_error(f"Wrong pattern {current_date_format}. "
+                                                               f"Could not convert provided value to timestamp."))
+                    .otherwise(F.date_format(date_as_ts, target_date_format).cast(StringType()))))
