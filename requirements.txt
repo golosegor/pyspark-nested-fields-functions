@@ -5,5 +5,5 @@ pyspark==3.2.1
 build==0.4.0
 
 #tests
-pytest==6.2.2
+pytest==7.1.3
 flake8==3.9.1
