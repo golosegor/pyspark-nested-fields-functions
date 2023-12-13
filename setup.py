@@ -43,6 +43,7 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=["tests"]),
     package_data={"nestedfunctions": ["VERSION"]},
     include_package_data=True,
+    # We make use of annotations which is only supported from python 3.7 onwards
     python_requires=">=3.7",
     install_requires=[
         REQUIREMENTS
