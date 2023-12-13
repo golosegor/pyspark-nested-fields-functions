@@ -31,7 +31,7 @@ python -m build
 ### dump dependencies periodically if dependencies changed
 
 ```bash
-py -m pip freeze > requirements.txt
+python -m pip freeze > requirements.txt
 ```
 
 
@@ -39,7 +39,7 @@ py -m pip freeze > requirements.txt
 
 ```bash
 # stop the build if there are Python syntax errors or undefined names
-flake8 src/ --count --select=E9,F63,F7,F82 --show-source --statistics
+flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=.svn,CVS,.bzr,.hg,.git,__pycache__,.tox,.eggs,*.egg,*.sql,venv
 # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-flake8 src/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=.svn,CVS,.bzr,.hg,.git,__pycache__,.tox,.eggs,*.egg,*.sql,venv
 ```
