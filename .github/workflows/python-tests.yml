@@ -14,24 +14,58 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-      # We make use of annotations which is only supported from python 3.7 onwards
-        python-version: [3.7, 3.8, 3.9, 3.10, 3.11, 3.12]
-        # python-version: [3.7]
+        versions:
+          # The amount of valid python, spark, hadoop combinations is almost endless so we just focus on the LTS and new Databricks Runtime releases
+          # https://docs.databricks.com/en/release-notes/runtime/index.html
+
+          # Lowest version allowed by setup.py and requirements.txt
+          - python: '3.7'
+            spark: '3.1.1'
+            hadoop: '2.7'
+          # DBR 9.1 LTS
+          - python: '3.8'
+            spark: '3.1.2'
+            hadoop: '2.7'
+          # DBR 10.4 LTS
+          - python: '3.8'
+            spark: '3.2.1'
+            hadoop: '3.2'
+          # DBR 11.3 LTS
+          - python: '3.9'
+            spark: '3.3.0'
+            hadoop: '3'
+          # DBR 12.2 LTS
+          - python: '3.9'
+            spark: '3.3.2'
+            hadoop: '3'
+          # DBR 13.3 LTS
+          - python: '3.10'
+            spark: '3.4.1'
+            hadoop: '3'
+          # DBR 14.2
+          - python: '3.10'
+            spark: '3.5.0'
+            hadoop: '3'
+          # Newer python versions which are not in DBR's yet
+          # (Python 3.12 is not supported on Spark 3.5.0)
+          - python: '3.11'
+            spark: '3.5.0'
+            hadoop: '3'
     steps:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python ${{ matrix.versions.python }}
       uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ matrix.versions.python }}
     - uses: actions/setup-java@v1
       with:
         java-version: '8'
     - uses: vemonet/setup-spark@v1
       with:
-        spark-version: '3.1.2'
-        hadoop-version: '3.2'
+        spark-version: ${{ matrix.versions.spark }}
+        hadoop-version: ${{ matrix.versions.hadoop }}
     - name: Install pip
       run: python -m pip install --upgrade pip
     - name: Install wheel
