@@ -32,7 +32,7 @@ class TerminalOperationProcessor(AnyLevelCoreProcessor):
         field_type: AtomicType = SparkSchemaUtility.schema_for_field(schema, previous)
         if is_array:
             return column.withField(f"`{column_name}`",
-                                    F.transform(previous, lambda d: self.transform_primitive(d,
+                                    F.transform(column.getField(column_name), lambda d: self.transform_primitive(d,
                                                                                              field_type)))
         else:
             return self.apply_complex_transformation(column, column_name, field_type)
