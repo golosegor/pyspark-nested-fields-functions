@@ -56,4 +56,5 @@ class DropProcessor(AnyLevelCoreProcessor):
             return False
 
     def __find_parent_field(self):
-        return self.schema_util.parent_element(self.column_to_process)
+        parent, _ = self.schema_util.parent_child_elements(self.column_to_process)
+        return parent
