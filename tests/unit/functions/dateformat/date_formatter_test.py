@@ -50,6 +50,14 @@ class DateFormatProcessorTest(SparkBaseTest):
             4: "2021-02"
         }, self.__parse_data_dateformatting(transformed))
 
+    def test_date_formatted_no_predicate_on_array(self):
+        df = parse_df_sample(self.spark,
+                             pkg_resources.resource_filename(__name__,
+                                                             "fixtures/date_formatting_on_array.json"))
+        self.assertEqual(df.select("customDimensions.dates").collect()[0][0][0], ["2021-12-01","2019-15-02","2021-15-02"])
+        transformed = format_date(df, "customDimensions.dates", "y-d-M", "y-MM")
+        self.assertEqual(["2021-01","2019-02","2021-02"], transformed.select("customDimensions.dates").collect()[0][0][0])
+
     def test_date_formatted_null_remains_null(self):
         df = parse_df_sample(self.spark,
                              pkg_resources.resource_filename(__name__,

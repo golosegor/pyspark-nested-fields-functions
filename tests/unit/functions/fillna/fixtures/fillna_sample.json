@@ -1,0 +1,51 @@
+{
+  "eventName": "stockForRequestedItems",
+  "eventVersion": null,
+  "supportedSystems": [
+    "SAP_S4HANA_CLOUD",
+    null
+  ],
+  "payload": {
+    "lineItems": [
+      {
+        "itemId":"3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "availability": {
+          "stores": [
+            {
+              "storeId" : "f0e50850-532d-4066-b5c0-b29c5577105a",
+              "isOnStock" : true,
+              "availableQuantity": 1
+            },
+            {
+              "storeId" : "c390e83d-1f92-4b0b-a04c-f486e92eca9a",
+              "isOnStock" : null,
+              "availableQuantity": null
+            }
+          ]
+        },
+        "comments": [
+          "Manually triggered stock check",
+          null
+        ]
+      },
+      {
+        "itemId":"ce760d0b27d8461b871d34cb3ef8dfd2",
+        "availability": {
+          "stores": [
+            {
+              "storeId" : "f0e50850-532d-4066-b5c0-b29c5577105a",
+              "isOnStock" : true,
+              "availableQuantity": 2
+            },
+            {
+              "storeId" : "c390e83d-1f92-4b0b-a04c-f486e92eca9a",
+              "isOnStock" : null,
+              "availableQuantity": null
+            }
+          ]
+        },
+        "comments": null
+      }
+    ]
+  }
+}

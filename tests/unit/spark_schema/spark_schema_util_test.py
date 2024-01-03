@@ -81,12 +81,16 @@ class SparkSchemaUtilityTest(SparkBaseTest):
         schema_for_field = utility.schema_for_field(df.schema, "root-element-array-of-structs.d1")
         self.assertEqual({"d2"}, set(schema_for_field.names))
 
-    def test_parent_field_found_correctly(self):
+    def test_paren_child_fields_found_correctly(self):
         utility = SparkSchemaUtility()
-        self.assertEqual("juan", utility.parent_element("juan.miguel"))
-        self.assertEqual("juan.miguel", utility.parent_element("juan.miguel.altube"))
+        parent, child = utility.parent_child_elements("juan.miguel")
+        self.assertEqual("juan", parent)
+        self.assertEqual("miguel", child)
+        parent, child = utility.parent_child_elements("juan.miguel.altube")
+        self.assertEqual("juan.miguel", parent)
+        self.assertEqual("altube", child)
 
-    def test_parent_field_raise_exception_if_no_parent(self):
+    def test_parent_child_fields_raise_exception_if_no_parent(self):
         utility = SparkSchemaUtility()
         with pytest.raises(Exception):
-            self.assertEqual("juan", utility.parent_element("juan"))
+            self.assertEqual("juan", utility.parent_child_elements("juan"))

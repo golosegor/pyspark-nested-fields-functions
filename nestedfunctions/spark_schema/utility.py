@@ -41,12 +41,12 @@ class SparkSchemaUtility:
                                                       '.'.join(columns_ordered))
 
     @staticmethod
-    def parent_element(column: str):
+    def parent_child_elements(column: str, raise_exception_if_no_parent: bool = True):
         separator = '.'
-        if '.' not in column:
+        if '.' not in column and raise_exception_if_no_parent:
             raise Exception(f"No parent element in {column}")
         *parents, last = column.split(separator)
-        return separator.join(parents)
+        return separator.join(parents), last
 
     @staticmethod
     def __get_schema_for_field(schema: StructType, col: str):
