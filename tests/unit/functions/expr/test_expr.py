@@ -16,53 +16,66 @@ log = logging.getLogger(__name__)
 class ExprTest(SparkBaseTest):
 
     def test_validate_email_with_regex_and_lower_email_field(self):
-        def parse_data(df: DataFrame) -> List[str]:
-            return [d["email"] for d in df.select("email").collect()]
+        def parse_data(df: DataFrame, col_name: str) -> List[str]:
+            return [d[col_name] for d in df.select(col_name).collect()]
 
         df = parse_df_sample(self.spark,
                              pkg_resources.resource_filename(__name__, "fixtures/exp_sample_01.json"))
-        self.assertEqual([''' Fuat@hotmail.com\t''', '''test Egor@hotmail.com\n'''], parse_data(df))
-        processed = expr(df, field="email", expr=r"lower(regexp_extract(email, '(\\S+@\\S+)', 1))")
+        self.assertEqual([''' Fuat@hotmail.com\t''', '''test Egor@hotmail.com\n'''], parse_data(df, "email"))
 
-        self.assertEqual(["fuat@hotmail.com", "egor@hotmail.com"], parse_data(processed))
+        # Test in place expr
+        processed = expr(df, field="email", expr=r"lower(regexp_extract(email, '(\\S+@\\S+)', 1))")
+        self.assertEqual(["fuat@hotmail.com", "egor@hotmail.com"], parse_data(processed, "email"))
+        # Test expr that adds field
+        processed = expr(df, field="email", expr=r"lower(regexp_extract(email, '(\\S+@\\S+)', 1))", new_field="email_cleansed")
+        self.assertEqual(["fuat@hotmail.com", "egor@hotmail.com"], parse_data(processed, "email_cleansed"))
 
     def test_validate_email_with_regex_and_lower_email_field_using_struct(self):
-        def parse_data(df: DataFrame) -> List[str]:
-            return [d["email"] for d in df.select("profile.email").alias('email').collect()]
+        def parse_data(df: DataFrame, col_name: str) -> List[str]:
+            return [d[col_name] for d in df.select(f"profile.{col_name}").alias(col_name).collect()]
 
         df = parse_df_sample(self.spark,
                              pkg_resources.resource_filename(__name__, "fixtures/exp_sample_03.json"))
+        self.assertEqual([''' Fuat@hotmail.com\t''', '''test Egor@hotmail.com\n'''], parse_data(df, "email"))
 
-        self.assertEqual([''' Fuat@hotmail.com\t''', '''test Egor@hotmail.com\n'''], parse_data(df))
+        # Test in place expr
         processed = expr(df, "profile.email", r"lower(regexp_extract(profile.email, '(\\S+@\\S+)', 1))")
-
-        self.assertEqual(["fuat@hotmail.com", "egor@hotmail.com"], parse_data(processed))
+        self.assertEqual(["fuat@hotmail.com", "egor@hotmail.com"], parse_data(processed, "email"))
+        # Test expr that adds field
+        processed = expr(df, "profile.email", r"lower(regexp_extract(profile.email, '(\\S+@\\S+)', 1))", new_field="profile.email_cleansed")
+        self.assertEqual(["fuat@hotmail.com", "egor@hotmail.com"], parse_data(processed, "email_cleansed"))
 
     def test_expr_nested_array(self):
         field = "emails.unverified"
 
-        def parse_data(df: DataFrame) -> List[str]:
-            return flatten([d[0] for d in df.select("emails.unverified").collect()])
+        def parse_data(df: DataFrame, col_name: str) -> List[str]:
+            return flatten([d[0] for d in df.select(f"emails.{col_name}").collect()])
 
         df = parse_df_sample(self.spark,
                              pkg_resources.resource_filename(__name__, "fixtures/nested_array_sample.json"))
-        self.assertEqual(["egorka@gmail.com\t", "juan-miguel@gmail.com\t"], parse_data(df))
+        self.assertEqual(["egorka@gmail.com\t", "juan-miguel@gmail.com\t"], parse_data(df, "unverified"))
 
+        # Test in place expr
         processed = expr(df, field, f"transform({field}, x -> (upper(x)))")
-
-        self.assertEqual(["EGORKA@GMAIL.COM\t", "JUAN-MIGUEL@GMAIL.COM\t"], parse_data(processed))
+        self.assertEqual(["EGORKA@GMAIL.COM\t", "JUAN-MIGUEL@GMAIL.COM\t"], parse_data(processed, "unverified"))
+        # Test expr that adds field
+        processed = expr(df, field, f"transform({field}, x -> (upper(x)))", new_field="emails.unverified_upper")
+        self.assertEqual(["EGORKA@GMAIL.COM\t", "JUAN-MIGUEL@GMAIL.COM\t"], parse_data(processed, "unverified_upper"))
 
     def test_expr_on_root_level(self):
-        def parse_data(df: DataFrame) -> List[str]:
-            return [d[0] for d in df.select("email").collect()]
+        def parse_data(df: DataFrame, col_name: str) -> List[str]:
+            return [d[0] for d in df.select(col_name).collect()]
 
         df = parse_df_sample(self.spark,
                              pkg_resources.resource_filename(__name__, "fixtures/exp_sample_01.json"))
-        self.assertEqual([' Fuat@hotmail.com\t', 'test Egor@hotmail.com\n'], parse_data(df))
+        self.assertEqual([' Fuat@hotmail.com\t', 'test Egor@hotmail.com\n'], parse_data(df, "email"))
 
+        # Test in place expr
         processed = expr(df, "email", f"upper(email)")
-
-        self.assertEqual([' FUAT@HOTMAIL.COM\t', 'TEST EGOR@HOTMAIL.COM\n'], parse_data(processed))
+        self.assertEqual([' FUAT@HOTMAIL.COM\t', 'TEST EGOR@HOTMAIL.COM\n'], parse_data(processed, "email"))
+        # Test expr that adds field
+        processed = expr(df, "email", f"upper(email)", new_field="email_upper")
+        self.assertEqual([' FUAT@HOTMAIL.COM\t', 'TEST EGOR@HOTMAIL.COM\n'], parse_data(processed, "email_upper"))
 
     def test_expr_factory_throws_exception_if_expr_is_empty(self):
         df = parse_df_sample(self.spark,
