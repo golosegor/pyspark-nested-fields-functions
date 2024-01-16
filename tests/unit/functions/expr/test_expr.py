@@ -27,7 +27,7 @@ class ExprTest(SparkBaseTest):
         processed = expr(df, field="email", expr=r"lower(regexp_extract(email, '(\\S+@\\S+)', 1))")
         self.assertEqual(["fuat@hotmail.com", "egor@hotmail.com"], parse_data(processed, "email"))
         # Test expr that adds field
-        processed = expr(df, field="email", expr=r"lower(regexp_extract(email, '(\\S+@\\S+)', 1))", new_field="email_cleansed")
+        processed = expr(df, field="email_cleansed", expr=r"lower(regexp_extract(email, '(\\S+@\\S+)', 1))")
         self.assertEqual(["fuat@hotmail.com", "egor@hotmail.com"], parse_data(processed, "email_cleansed"))
 
     def test_validate_email_with_regex_and_lower_email_field_using_struct(self):
@@ -42,7 +42,7 @@ class ExprTest(SparkBaseTest):
         processed = expr(df, "profile.email", r"lower(regexp_extract(profile.email, '(\\S+@\\S+)', 1))")
         self.assertEqual(["fuat@hotmail.com", "egor@hotmail.com"], parse_data(processed, "email"))
         # Test expr that adds field
-        processed = expr(df, "profile.email", r"lower(regexp_extract(profile.email, '(\\S+@\\S+)', 1))", new_field="profile.email_cleansed")
+        processed = expr(df, "profile.email_cleansed", r"lower(regexp_extract(profile.email, '(\\S+@\\S+)', 1))")
         self.assertEqual(["fuat@hotmail.com", "egor@hotmail.com"], parse_data(processed, "email_cleansed"))
 
     def test_expr_nested_array(self):
@@ -59,7 +59,7 @@ class ExprTest(SparkBaseTest):
         processed = expr(df, field, f"transform({field}, x -> (upper(x)))")
         self.assertEqual(["EGORKA@GMAIL.COM\t", "JUAN-MIGUEL@GMAIL.COM\t"], parse_data(processed, "unverified"))
         # Test expr that adds field
-        processed = expr(df, field, f"transform({field}, x -> (upper(x)))", new_field="emails.unverified_upper")
+        processed = expr(df, "emails.unverified_upper", f"transform({field}, x -> (upper(x)))")
         self.assertEqual(["EGORKA@GMAIL.COM\t", "JUAN-MIGUEL@GMAIL.COM\t"], parse_data(processed, "unverified_upper"))
 
     def test_expr_on_root_level(self):
@@ -74,7 +74,7 @@ class ExprTest(SparkBaseTest):
         processed = expr(df, "email", f"upper(email)")
         self.assertEqual([' FUAT@HOTMAIL.COM\t', 'TEST EGOR@HOTMAIL.COM\n'], parse_data(processed, "email"))
         # Test expr that adds field
-        processed = expr(df, "email", f"upper(email)", new_field="email_upper")
+        processed = expr(df, "email_upper", f"upper(email)")
         self.assertEqual([' FUAT@HOTMAIL.COM\t', 'TEST EGOR@HOTMAIL.COM\n'], parse_data(processed, "email_upper"))
 
     def test_expr_factory_throws_exception_if_expr_is_empty(self):
@@ -82,3 +82,9 @@ class ExprTest(SparkBaseTest):
                              pkg_resources.resource_filename(__name__, "fixtures/exp_sample_03.json"))
         with pytest.raises(ValueError):
             expr(df, field="userId", expr="")
+
+    def test_expr_factory_throws_exception_if_non_existing_field_and_parent_of_field(self):
+        df = parse_df_sample(self.spark,
+                             pkg_resources.resource_filename(__name__, "fixtures/exp_sample_01.json"))
+        with pytest.raises(ValueError):
+            expr(df, field="profile.email", expr="'literalValue'")

@@ -6,9 +6,28 @@ from nestedfunctions.processors.any_level_processor import AnyLevelCoreProcessor
 from nestedfunctions.spark_schema.utility import SparkSchemaUtility
 
 
-def expr(df: DataFrame, field: str, expr: str, new_field: str = None) -> DataFrame:
+def expr(df: DataFrame, field: str, expr: str) -> DataFrame:
     if not expr:
         raise ValueError("Expr could not be empty")
+    sparkSchemaUtility = SparkSchemaUtility()
+    new_field = None
+    if not sparkSchemaUtility.does_column_exist(df.schema, field):
+        new_field = field
+
+        if '.' not in new_field:
+            root_level_fields = [x.name for x in df.schema if type(x.dataType) != StructType]
+            return ExprProcessor(root_level_fields[0], expr, new_field).process(df)
+
+        # Get an existing nested field at the same level as the new nested field.
+        new_field_parent, _ = sparkSchemaUtility.parent_child_elements(field, raise_exception_if_no_parent=False)
+        if not sparkSchemaUtility.does_column_exist(df.schema, new_field_parent):
+            raise ValueError(f"Field `{field}` does not exist and neither has an existing parent!")
+        for flattened_field in sparkSchemaUtility.flatten_schema(df.schema):
+            direct_child_of_new_field_parent = f"{new_field_parent}." in flattened_field and '.' not in flattened_field.replace(f"{new_field_parent}.","")
+            if direct_child_of_new_field_parent:
+                field = flattened_field
+                break
+
     return ExprProcessor(field, expr, new_field).process(df)
 
 
