@@ -29,7 +29,7 @@ class DropProcessor(AnyLevelCoreProcessor):
 
     def process(self, df: DataFrame) -> DataFrame:
         log.debug(f"Dropping {self.column_to_process}")
-        if not self.schema_util.is_column_exist(df.schema, self.column_to_process):
+        if not self.schema_util.does_column_exist(df.schema, self.column_to_process):
             log.warning(f"Column {self.column_to_process} does not exist. Ignoring")
             return df
         if self.is_last_element_in_structure(df):
