@@ -41,6 +41,17 @@ class SparkSchemaUtility:
                                                       '.'.join(columns_ordered))
 
     @staticmethod
+    def parents_for_field(field: str) -> Set[str]:
+        separator = '.'
+        *parents, _ = field.split(separator)
+
+        all_parents, previous_parent = [] , ''
+        for index, parent in enumerate(parents):
+            all_parents.append(f"{previous_parent}{parent}")
+            previous_parent = f"{all_parents[index]}{separator}"
+        return set(all_parents)
+
+    @staticmethod
     def parent_child_elements(column: str, raise_exception_if_no_parent: bool = True):
         separator = '.'
         if '.' not in column and raise_exception_if_no_parent:

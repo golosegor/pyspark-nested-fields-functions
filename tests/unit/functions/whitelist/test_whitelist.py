@@ -26,43 +26,43 @@ class WhitelistTest(SparkBaseTest):
         self.assertEqual(df.collect(), processed.collect())
 
     def test_whitelist_select_only_common_element(self):
-        filtered = filter_only_parents_fields(["address",
+        filtered = filter_only_parents_fields({"address",
                                                "address.postalCode",
                                                "address.whatever",
                                                "data",
                                                "data.name",
                                                "data.surname",
-                                               "egorka228"])
-        self.assertEqual({'address', 'data', 'egorka228'}, set(filtered))
+                                               "egorka228"})
+        self.assertEqual({'address', 'data', 'egorka228'}, filtered)
 
     def test_whitelist_select_only_common_element_in_second_level(self):
-        filtered = filter_only_parents_fields(["address.postalCode.number",
+        filtered = filter_only_parents_fields({"address.postalCode.number",
                                                "address.postalCode.region",
-                                               "address.whatever"])
-        self.assertEqual({'address.postalCode.number', 'address.postalCode.region', 'address.whatever'}, set(filtered))
+                                               "address.whatever"})
+        self.assertEqual({'address.postalCode.number', 'address.postalCode.region', 'address.whatever'}, filtered)
 
     def test_whitelist_select_only_common_element_in_second_level_v2(self):
-        filtered = filter_only_parents_fields(["address.postalCode.number",
+        filtered = filter_only_parents_fields({"address.postalCode.number",
                                                "address.postalCode.region",
                                                "address.whatever",
-                                               "address.postalCode"])
-        self.assertEqual({'address.postalCode', 'address.whatever'}, set(filtered))
+                                               "address.postalCode"})
+        self.assertEqual({'address.postalCode', 'address.whatever'}, filtered)
 
     def test_whitelist_select_only_common_element_t1(self):
-        filtered = filter_only_parents_fields([])
-        self.assertEqual([], filtered)
+        filtered = filter_only_parents_fields(set())
+        self.assertEqual(set(), filtered)
 
     def test_whitelist_select_only_common_element_t2(self):
-        filtered = filter_only_parents_fields(["element1"])
-        self.assertEqual(["element1"], filtered)
+        filtered = filter_only_parents_fields({"element1"})
+        self.assertEqual({"element1"}, filtered)
 
     def test_whitelist_select_only_common_element_gigya_bug(self):
         whitelist = {
             'lastUpdated',
             'lastUpdatedTimestamp',
         }
-        parents_only = filter_only_parents_fields(list(whitelist))
-        self.assertEqual(whitelist, set(parents_only))
+        parents_only = filter_only_parents_fields(whitelist)
+        self.assertEqual(whitelist, parents_only)
 
     def test_whitelist_ignored_unknown_fields(self):
         def parse_data(df: DataFrame) -> str:
@@ -123,8 +123,8 @@ class WhitelistTest(SparkBaseTest):
     def test_fields_to_delete_found_correctly(self):
         fields_to_drop = WhitelistProcessor.find_fields_to_drop(
             flattened_fields={"UID", "created", "identities.providerUID"},
-            whitelist={"UID", "created"})
-        self.assertEqual({"identities.providerUID"}, fields_to_drop)
+            whitelist_fields={"UID", "created"})
+        self.assertEqual({"identities"}, fields_to_drop)
 
     def test_fields_to_delete_found_correctly2(self):
         fields_to_drop = WhitelistProcessor.find_fields_to_drop(
@@ -134,14 +134,14 @@ class WhitelistTest(SparkBaseTest):
                 "addresses.flats.escalera",
                 "addresses.flats.piso",
                 "addresses.zipCode"},
-            whitelist={"addresses.postalCode",
+            whitelist_fields={"addresses.postalCode",
                        "addresses.postalCode",
                        "addresses",
                        "non-existing",
                        "creditCard"})
         self.assertEqual(set(), fields_to_drop)
 
-    def all_fields_are_about_to_drop(self):
+    def test_all_fields_are_about_to_drop(self):
         fields_to_drop = WhitelistProcessor.find_fields_to_drop(
             flattened_fields={
                 "creditCard",
@@ -149,7 +149,7 @@ class WhitelistTest(SparkBaseTest):
                 "addresses.flats.escalera",
                 "addresses.flats.piso",
                 "addresses.zipCode"},
-            whitelist={"addresses.postalCode",
+            whitelist_fields={"addresses.postalCode",
                        "addresses.postalCode",
                        "addresses",
                        "non-existing",
@@ -164,7 +164,7 @@ class WhitelistTest(SparkBaseTest):
                 "addresses.flats.escalera",
                 "addresses.flats.piso",
                 "addresses.zipCode"},
-            whitelist={"addresses.postalCode",
+            whitelist_fields={"addresses.postalCode",
                        "addresses.postalCode",
                        "addresses",
                        "non-existing",
@@ -178,5 +178,17 @@ class WhitelistTest(SparkBaseTest):
             "hits.page.pagePath",
             "hits.page.pagePathLevel1"
         }
-        fields_to_drop = WhitelistProcessor.find_fields_to_drop(flattened_fields=fields, whitelist=whitelist)
-        self.assertFalse("hits.page.pagePathLevel1" in fields_to_drop)
+        fields_to_drop = WhitelistProcessor.find_fields_to_drop(flattened_fields=fields, whitelist_fields=whitelist)
+        self.assertEqual(set(), fields_to_drop)
+
+    def test_scenario_drop_parent_iso_all_childs(self):
+        fields_to_drop = WhitelistProcessor.find_fields_to_drop(
+            flattened_fields={
+                "creditCard",
+                "addresses.postalCode",
+                "addresses.flats.escalera",
+                "addresses.flats.piso",
+                "addresses.zipCode"},
+            whitelist_fields={"addresses.zipCode",
+                       "addresses.postalCode"})
+        self.assertEqual({"creditCard", "addresses.flats"}, fields_to_drop)
