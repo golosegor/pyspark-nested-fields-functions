@@ -119,7 +119,6 @@ duplicated_df = duplicate(
       column_to_duplicate="payload.lineItems.comments",
       duplicated_column_name="payload.lineItems.commentsDuplicate"
   )
-# Usage details not available in the provided workspace
 ```
 
 #### Expr
