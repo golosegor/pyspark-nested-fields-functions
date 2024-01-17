@@ -1,6 +1,6 @@
 [![Python tests](https://github.com/golosegor/pyspark-nested-fields-functions/actions/workflows/python-tests.yml/badge.svg)](https://github.com/golosegor/pyspark-nested-fields-functions/actions/workflows/python-tests.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![PyPI version](https://badge.fury.io/py/pyspark-nested-functions.svg)](https://badge.fury.io/py/pyspark-nested-functions)
+![PyPI version](https://badge.fury.io/py/pyspark-nested-functions.svg)
 ![PYPI - Downloads](https://static.pepy.tech/badge/pyspark-nested-functions)
 ![PYPI - Python Version](https://img.shields.io/pypi/pyversions/pyspark-nested-functions.svg)
 
