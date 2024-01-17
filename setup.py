@@ -35,8 +35,7 @@ REQUIREMENTS = [i.strip() for i in open("requirements.txt").readlines() if i.spl
 setuptools.setup(
     name="pyspark_nested_functions",
     version=remote_version,
-    author='Brend Braeckmans, Egor Goloshchapov',
-    author_email='brend@distilleddata.be, golosegor@gmail.com',
+    author="Brend Braeckmans <brend@distilleddata.be>, Egor Goloshchapov <golosegor@gmail.com>",
     description="Utility functions to manipulate nested structures using pyspark",
     long_description=long_description,
     long_description_content_type="text/markdown",
