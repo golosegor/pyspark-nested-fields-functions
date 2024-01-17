@@ -137,7 +137,7 @@ Rename all the fields based on any rename function.
 
 ```python
 from nestedfunctions.functions.field_rename import rename
-def capitalize_field_name(field_name: str, suffix: str) -> str:
+def capitalize_field_name(field_name: str) -> str:
   return field_name.upper()
 renamed_df = rename(df, rename_func=capitalize_field_name())
 ```
