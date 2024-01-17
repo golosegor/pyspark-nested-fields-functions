@@ -19,7 +19,7 @@ class LambdaBasedAddOperation(AddOperationProcessor):
     def transform_primitive(self, primitive_value: Column, fieldType: AtomicType) -> Column:
         return self.f(primitive_value)
 
-def apply_add_operation(df: DataFrame,
+def add_nested_field(df: DataFrame,
                              column_to_process: str,
                              new_column_name: str,
                              f: Callable[[Column], Column]) -> DataFrame:
