@@ -31,7 +31,7 @@ class AddOperationsTest(SparkBaseTest):
         processed = apply_add_operation(df,
                                         "payload.lineItems.availability.stores.isOnStock",
                                         "payload.lineItems.availability.stores.isOnStockChar1",
-                                        lambda column, t: boolean_column_to_char_1_column(column))
+                                        lambda column: boolean_column_to_char_1_column(column))
         self.assertEqual(parse_item_store_is_on_stock(processed, item_index=0, store_index=0, is_on_stock_column_name="isOnStockChar1"), "Y")
         self.assertEqual(parse_item_store_is_on_stock(processed, item_index=0, store_index=1, is_on_stock_column_name="isOnStockChar1"), "N")
         self.assertEqual(parse_item_store_is_on_stock(processed, item_index=1, store_index=0, is_on_stock_column_name="isOnStockChar1"), "Y")
