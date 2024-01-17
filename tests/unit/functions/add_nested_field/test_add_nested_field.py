@@ -5,7 +5,7 @@ import pkg_resources
 from pyspark.sql import Column, DataFrame
 import pyspark.sql.functions as F
 
-from nestedfunctions.functions.add_operations import apply_add_operation
+from nestedfunctions.functions.add_nested_field import add_nested_field
 
 from tests.unit.functions.spark_base_test import SparkBaseTest
 from tests.unit.utils.testing_utils import parse_df_sample
@@ -28,10 +28,10 @@ class AddOperationsTest(SparkBaseTest):
 
         def boolean_column_to_char_1_column(column: Column) -> Column:
            return F.when(column== True,"Y").when(column== False,"N").otherwise("")
-        processed = apply_add_operation(df,
+        processed = add_nested_field(df,
                                         "payload.lineItems.availability.stores.isOnStock",
                                         "payload.lineItems.availability.stores.isOnStockChar1",
-                                        lambda column, t: boolean_column_to_char_1_column(column))
+                                        lambda column: boolean_column_to_char_1_column(column))
         self.assertEqual(parse_item_store_is_on_stock(processed, item_index=0, store_index=0, is_on_stock_column_name="isOnStockChar1"), "Y")
         self.assertEqual(parse_item_store_is_on_stock(processed, item_index=0, store_index=1, is_on_stock_column_name="isOnStockChar1"), "N")
         self.assertEqual(parse_item_store_is_on_stock(processed, item_index=1, store_index=0, is_on_stock_column_name="isOnStockChar1"), "Y")

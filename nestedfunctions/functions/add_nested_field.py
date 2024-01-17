@@ -12,16 +12,15 @@ log = logging.getLogger(__name__)
 
 
 class LambdaBasedAddOperation(AddOperationProcessor):
-    def __init__(self, column_to_process: str, new_column_name: str, f: Callable[[Column, AtomicType], Column])-> None:
+    def __init__(self, column_to_process: str, new_column_name: str, f: Callable[[Column], Column])-> None:
         super().__init__(column_to_process, new_column_name)
         self.f = f
 
     def transform_primitive(self, primitive_value: Column, fieldType: AtomicType) -> Column:
-        return self.f(primitive_value, fieldType)
+        return self.f(primitive_value)
 
-
-def apply_add_operation(df: DataFrame,
+def add_nested_field(df: DataFrame,
                              column_to_process: str,
                              new_column_name: str,
-                             f: Callable[[Column, AtomicType], Column]) -> DataFrame:
+                             f: Callable[[Column], Column]) -> DataFrame:
     return LambdaBasedAddOperation(column_to_process, new_column_name, f).process(df)
