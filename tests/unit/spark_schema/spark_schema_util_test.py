@@ -37,11 +37,11 @@ class SparkSchemaUtilityTest(SparkBaseTest):
                                                              "fixtures/double_array_schema_check.json"))
         schema = df.schema
         utility = SparkSchemaUtility()
-        self.assertFalse(utility.is_column_exist(schema, "analytics"))
-        self.assertFalse(utility.is_column_exist(schema, "data.analytics._ga"))
-        self.assertFalse(utility.is_column_exist(schema, "root-field-array.one-level-nested-array.non-existing-field"))
-        self.assertTrue(utility.is_column_exist(schema, "root-field-array.one-level-nested-array.id"))
-        self.assertFalse(utility.is_column_exist(schema, "root-field-primitive-array.non-existing-field"))
+        self.assertFalse(utility.does_column_exist(schema, "analytics"))
+        self.assertFalse(utility.does_column_exist(schema, "data.analytics._ga"))
+        self.assertFalse(utility.does_column_exist(schema, "root-field-array.one-level-nested-array.non-existing-field"))
+        self.assertTrue(utility.does_column_exist(schema, "root-field-array.one-level-nested-array.id"))
+        self.assertFalse(utility.does_column_exist(schema, "root-field-primitive-array.non-existing-field"))
 
     def test_flatten_schema(self):
         df = parse_df_sample(self.spark,

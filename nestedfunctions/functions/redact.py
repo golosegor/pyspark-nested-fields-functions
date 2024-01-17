@@ -56,7 +56,7 @@ class RedactProcessor(TerminalOperationProcessor):
 
     def process(self, df: DataFrame) -> DataFrame:
         utility = SparkSchemaUtility()
-        if not utility.is_column_exist(df.schema, self.column_to_process):
+        if not utility.does_column_exist(df.schema, self.column_to_process):
             log.warning(f"Column {self.column_to_process} does not exist. Ignoring redacting process")
             return df
         field_type = utility.schema_for_field(df.schema, self.column_to_process)

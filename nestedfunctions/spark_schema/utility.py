@@ -26,7 +26,7 @@ class SparkSchemaUtility:
         return flatten_schema(schema)
 
     @staticmethod
-    def is_column_exist(schema: StructType, column: str) -> bool:
+    def does_column_exist(schema: StructType, column: str) -> bool:
         columns_ordered = column.split('.')
         col = columns_ordered.pop(0)
         if not isinstance(schema, StructType):
@@ -37,8 +37,19 @@ class SparkSchemaUtility:
             return col in schema.names
 
         else:
-            return SparkSchemaUtility.is_column_exist(SparkSchemaUtility.__get_schema_for_field(schema, col),
+            return SparkSchemaUtility.does_column_exist(SparkSchemaUtility.__get_schema_for_field(schema, col),
                                                       '.'.join(columns_ordered))
+
+    @staticmethod
+    def parents_for_field(field: str) -> Set[str]:
+        separator = '.'
+        *parents, _ = field.split(separator)
+
+        all_parents, previous_parent = [] , ''
+        for index, parent in enumerate(parents):
+            all_parents.append(f"{previous_parent}{parent}")
+            previous_parent = f"{all_parents[index]}{separator}"
+        return set(all_parents)
 
     @staticmethod
     def parent_child_elements(column: str, raise_exception_if_no_parent: bool = True):
@@ -73,7 +84,7 @@ class SparkSchemaUtility:
 
     @staticmethod
     def schema_for_field(schema: StructType, field: str) -> Union[StructType, AtomicType]:
-        if not SparkSchemaUtility.is_column_exist(schema, field):
+        if not SparkSchemaUtility.does_column_exist(schema, field):
             raise Exception(f"Column `{field}` does not exist")
         return SparkSchemaUtility.__schema_for_field_rec(schema, field)
 

@@ -17,7 +17,7 @@ class AnyLevelCoreProcessor(CoreProcessor):
         self.column_to_process = validate_field_name_or_throw(column_to_process)
 
     def process(self, df: DataFrame) -> DataFrame:
-        if not SparkSchemaUtility.is_column_exist(df.schema, self.column_to_process):
+        if not SparkSchemaUtility.does_column_exist(df.schema, self.column_to_process):
             log.error(f'Column `{self.column_to_process}` does not exist. This column will not be processed')
             return df
         (root, remaining) = self.__parse_head_tail(self.column_to_process)
