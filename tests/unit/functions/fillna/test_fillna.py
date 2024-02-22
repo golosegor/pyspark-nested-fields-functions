@@ -1,10 +1,11 @@
 import logging
-from typing import Dict, List
+from typing import List
 
 import pkg_resources
 
 from pyspark.sql import DataFrame
 import pyspark.sql.functions as F
+from pyspark.sql.types import *
 
 from nestedfunctions.functions.fillna import fillna
 from tests.unit.functions.spark_base_test import SparkBaseTest
@@ -134,3 +135,68 @@ class FillNaTest(SparkBaseTest):
         processed = fillna(df, value={"supportedSystems":"UNKNOWN", "eventVersion":"1.0"})
         self.assertEqual(parse_event_version(processed), "1.0")
         self.assertEqual(parse_supported_systems(processed), ['SAP_S4HANA_CLOUD', "UNKNOWN"])
+
+    def test_fillna_ancestor_struct_is_null(self):
+        schema = StructType(
+            [
+                StructField('eventName', StringType(), True),
+                StructField('eventVersion', StringType(), True),
+                StructField('payload', StructType(
+                    [
+                        StructField('lineItems', ArrayType(
+                            StructType(
+                                [
+                                    StructField('availability', StructType(
+                                        [
+                                            StructField('availableQuantity', LongType(), True),
+                                            StructField('isOnStock', BooleanType(), True),
+                                            StructField('storeId', StringType(), True),
+                                            StructField('availableQuantityForSize', StructType(
+                                                [
+                                                    StructField('availableQuantityS', LongType(), True),
+                                                    StructField('availableQuantityM', LongType(), True),
+                                                    StructField('availableQuantityL', LongType(), True)
+                                                ]
+                                            ), True),
+                                            StructField('availableQuantityForColor', ArrayType(
+                                                StructType(
+                                                    [
+                                                        StructField('Color', LongType(), True),
+                                                        StructField('availableQuantity', LongType(), True)
+                                                    ]
+                                                ), True)
+                                                , True),
+                                        ]
+                                    ), True),
+                                    StructField('itemId', StringType(), True)
+                                ]
+                            ), True),
+                        True)
+                    ]
+                ), True),
+                StructField('supportedSystems', ArrayType(StringType(), True), True)
+            ]
+        )
+
+        path = pkg_resources.resource_filename(__name__, "fixtures/fillna_ancestor_struct_missing.json")
+        df = self.spark.read.format('json').option("multiLine", True).schema(schema).load(path=path)
+
+        processed_parent_null = fillna(df,
+                    value={
+                        "payload.lineItems.availability.availableQuantity" : 0,
+                        "payload.lineItems.availability.availableQuantityForSize.availableQuantityS" : 0,
+                        "payload.lineItems.availability.availableQuantityForColor.availableQuantity" : 0,
+                        }
+        )
+
+        processed_line_items_dict = processed_parent_null.head().asDict()['payload']['lineItems']
+        # Availability struct is NULL and want to check if the to be filled fields get filled correctly !
+        for i in range(2):
+            # If parent of the to be filled field is NULL then the to be filled field should be filled with the specified value
+            self.assertEqual(processed_line_items_dict[i]["availability"]["availableQuantity"], 0)
+            # If the grand-parent of the to be filled field is NULL then the to be filled field should be filled with the specified value
+            self.assertEqual(processed_line_items_dict[i]["availability"]["availableQuantityForSize"]["availableQuantityS"], 0)
+
+            # If the ancestor of the to be filled field is NULL but the parent is an array the array should remain NULL.
+            # We don't add elements to the availableQuantityForColor array and keep it NULL !
+            self.assertEqual(processed_line_items_dict[i]["availability"]["availableQuantityForColor"], None)

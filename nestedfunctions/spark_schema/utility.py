@@ -70,8 +70,7 @@ class SparkSchemaUtility:
             return f.dataType
 
     @staticmethod
-    def is_array(schema: StructType, field: str) -> bool:
-        log.debug(f"Checking is array for field: {field}")
+    def __get_type_for_field(schema: StructType, field: str) -> AtomicType:
         split = field.split(".")
         t = schema
         for sub_type in split:
@@ -80,7 +79,19 @@ class SparkSchemaUtility:
                 t = data_type.elementType
             else:
                 t = data_type
-        return type(data_type) == ArrayType
+        return type(data_type)
+
+    @staticmethod
+    def is_array(schema: StructType, field: str) -> bool:
+        log.debug(f"Checking is array for field: {field}")
+        spark_sql_type = SparkSchemaUtility.__get_type_for_field(schema, field)
+        return spark_sql_type == ArrayType
+
+    @staticmethod
+    def is_struct(schema: StructType, field: str) -> bool:
+        log.debug(f"Checking is struct for field: {field}")
+        spark_sql_type = SparkSchemaUtility.__get_type_for_field(schema, field)
+        return spark_sql_type == StructType
 
     @staticmethod
     def schema_for_field(schema: StructType, field: str) -> Union[StructType, AtomicType]:

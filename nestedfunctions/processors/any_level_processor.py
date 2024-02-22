@@ -80,6 +80,10 @@ class AnyLevelCoreProcessor(CoreProcessor):
         else:
             # non-array case. Calculating next column (based on 'root/non-root' level)
             col = self.__next_column(current_column, current_column_name)
+
+            # Applying withField on NULL column will change the schema of the column but the column remains NULL.
+            # If the column is a struct this behavior is undesired so we first fill the column with a struct that has NULL values for all of its fields.
+            col = self.__fill_null_struct_with_null_fields(col, previous, schema)
             return self.__process_field_with(schema=schema,
                                              current_column_name=head,
                                              next=tail,
@@ -93,13 +97,39 @@ class AnyLevelCoreProcessor(CoreProcessor):
             col = current_column.getField(current_column_name)
         return col
 
-    def __is_root_level_transformation(self, column: Column) -> bool:
+    @staticmethod
+    def __is_root_level_transformation(column: Column) -> bool:
         return column is None
 
-    def __parse_head_tail(self, param: str) -> Tuple[str, Optional[str]]:
+    @staticmethod
+    def __parse_head_tail(param: str) -> Tuple[str, Optional[str]]:
         if "." in param:
             (head, tail) = param.split(".", maxsplit=1)
         else:
             (head, tail) = param, None
         head_tail = head, tail
         return head_tail
+
+    @staticmethod
+    def __fill_null_struct_with_null_fields(
+            column: Column,
+            column_name: str,
+            dataframe_schema: StructType
+        ) -> Column:
+        if not SparkSchemaUtility.is_struct(dataframe_schema, column_name):
+            raise TypeError(f"column argument should be a struct !")
+
+        column_schema = SparkSchemaUtility.schema_for_field(dataframe_schema, column_name)
+        assignment_list = [f"{field} : null" for field in column_schema.names]
+        json_str = f"{{{', '.join(assignment_list)}}}"
+        column = (
+            F.when(
+                column.isNull(), 
+                    F.from_json(
+                        F.lit(json_str),
+                        column_schema
+                    )
+                )
+            .otherwise(column)
+        )
+        return column
