@@ -4,6 +4,7 @@ from typing import List
 import pkg_resources
 import pytest
 from pyspark.sql import DataFrame
+from pyspark.sql.types import *
 
 from nestedfunctions.functions.expr import expr
 from nestedfunctions.utils.iterators.iterator_utils import flatten
@@ -88,3 +89,79 @@ class ExprTest(SparkBaseTest):
                              pkg_resources.resource_filename(__name__, "fixtures/exp_sample_01.json"))
         with pytest.raises(ValueError):
             expr(df, field="profile.email", expr="'literalValue'")
+
+    def test_expr_ancestor_struct_is_null(self):
+        schema = StructType(
+            [
+                StructField('eventName', StringType(), True),
+                StructField('eventVersion', StringType(), True),
+                StructField('payload', StructType(
+                    [
+                        StructField('lineItems', ArrayType(
+                            StructType(
+                                [
+                                    StructField('availability', StructType(
+                                        [
+                                            StructField('availableQuantity', LongType(), True),
+                                            StructField('isOnStock', BooleanType(), True),
+                                            StructField('storeId', StringType(), True),
+                                            StructField('availableQuantityForSize', StructType(
+                                                [
+                                                    StructField('availableQuantityS', LongType(), True),
+                                                    StructField('availableQuantityM', LongType(), True),
+                                                    StructField('availableQuantityL', LongType(), True)
+                                                ]
+                                            ), True),
+                                            StructField('availableQuantityForColor', ArrayType(
+                                                StructType(
+                                                    [
+                                                        StructField('Color', LongType(), True),
+                                                        StructField('availableQuantity', LongType(), True)
+                                                    ]
+                                                ), True)
+                                                , True),
+                                        ]
+                                    ), True),
+                                    StructField('itemId', StringType(), True)
+                                ]
+                            ), True),
+                        True)
+                    ]
+                ), True),
+                StructField('supportedSystems', ArrayType(StringType(), True), True)
+            ]
+        )
+
+        path = pkg_resources.resource_filename(__name__, "fixtures/expr_ancestor_struct_missing.json")
+        df = self.spark.read.format('json').option("multiLine", True).schema(schema).load(path=path)
+
+        processed_parent_null = expr(
+            df=df,
+            field="payload.lineItems.availability.dummyField",
+            expr="0"
+        )
+        processed_line_items_dict = processed_parent_null.head().asDict()['payload']['lineItems']
+        # If parent of the to be filled field is NULL then the to be filled field should be filled with the specified value
+        for i in range(2):
+            self.assertEqual(processed_line_items_dict[i]["availability"]["dummyField"], 0)
+
+        processed_grand_parent_null = expr(
+            df=df,
+            field="payload.lineItems.availability.availableQuantityForSize.dummyField",
+            expr="0"
+        )
+        processed_line_items_dict = processed_grand_parent_null.head().asDict()['payload']['lineItems']
+       # If the grand-parent of the to be filled field is NULL then the to be filled field should be filled with the specified value
+        for i in range(2):
+            self.assertEqual(processed_line_items_dict[i]["availability"]["availableQuantityForSize"]["dummyField"], 0)
+
+        processed_grand_parent_null_array = expr(
+            df=df,
+            field="payload.lineItems.availability.availableQuantityForColor.dummyField",
+            expr="0"
+        )
+        processed_line_items_dict = processed_grand_parent_null_array.head().asDict()['payload']['lineItems']
+        # If the ancestor of the to be filled field is NULL but the parent is an array the array should remain NULL.
+        # We don't add elements to the availableQuantityForColor array and keep it NULL !
+        for i in range(2):
+            self.assertEqual(processed_line_items_dict[i]["availability"]["availableQuantityForColor"], None)
