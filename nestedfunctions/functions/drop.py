@@ -34,38 +34,31 @@ class DropProcessor(AnyLevelCoreProcessor):
     @classmethod
     def consolidate_fields_to_drop(cls, dataframe_schema: StructType, fields_to_drop: List[str]) -> List[str]:
         fields_to_drop = set(fields_to_drop)
-        non_existent_fields = []
-        for field in fields_to_drop:
-            if not cls.schema_util.does_column_exist(dataframe_schema, field):
-                log.warning(f"Column {field} does not exist. Ignoring")
-                non_existent_fields.append(field)
-        fields_to_drop = {x for x in fields_to_drop if x not in non_existent_fields}
+        non_existent_fields = {field for field in fields_to_drop if not cls.schema_util.does_column_exist(dataframe_schema, field)}
+        if non_existent_fields:
+            log.warning(f"Column(s) {non_existent_fields} don't exist. Ignoring")
+        fields_to_drop -= non_existent_fields
 
         flattened_fields = cls.schema_util.flatten_schema(dataframe_schema)
-        fields_to_keep = [
-            x for x in flattened_fields
-            if not cls.is_field_or_ancestor_in_fields_to_drop(x, fields_to_drop)
-        ]
+        fields_to_keep = {x for x in flattened_fields if not cls.is_field_or_ancestor_in_fields_to_drop(x, fields_to_drop)}
 
         # If every child of a parent needs to be dropped all these children will be in fields_to_drop.
         # I.s.o dropping these children 1 by 1 the parent can just be dropped !
         # By sorting the parents make sure to start from the root and drop the parent as early as possible.
-        parents_of_fields_to_drop = set()
-        for field in fields_to_drop:
-            parents_of_fields_to_drop.update(cls.schema_util.parents_for_field(field))
+        parents_of_fields_to_drop = {parent for field in fields_to_drop for parent in cls.schema_util.parents_for_field(field)}
         parents_of_fields_to_drop = sorted(parents_of_fields_to_drop)
 
         index = 0
         while index < len(parents_of_fields_to_drop):
             parent_field = parents_of_fields_to_drop[index]
-            child_fields_to_keep = [x for x in fields_to_keep if x.startswith(f"{parent_field}.")]
+            child_fields_to_keep = {x for x in fields_to_keep if x.startswith(f"{parent_field}.")}
             if not child_fields_to_keep: 
                 # Remove all the children of parent_field from fields_to_drop and add parent_field
                 fields_to_drop.add(parent_field)
-                fields_to_drop = {x for x in fields_to_drop if not x.startswith(f"{parent_field}.")}
+                fields_to_drop -= {x for x in fields_to_drop if x.startswith(f"{parent_field}.")}
 
                 # Remove all the children of parent_field from parents_of_fields_to_drop to avoid unnecessary iterations.
-                # This is safe as parents_of_fields_to_drop is sorted.
+                # Removing these children in combination with increasing the index is safe as parents_of_fields_to_drop is sorted.
                 parents_of_fields_to_drop = [x for x in parents_of_fields_to_drop if not x.startswith(f"{parent_field}.")]
             index += 1
         return list(fields_to_drop)
@@ -76,12 +69,8 @@ class DropProcessor(AnyLevelCoreProcessor):
         log.debug(f"Consolidated these fields_to_drop to {self.fields_to_drop}")
         
         # Sort the fields_to_drop by decreasing depth.
-        field_to_drop_depth = {}
-        for field_to_drop in self.fields_to_drop:
-            field_to_drop_depth[field_to_drop] = field_to_drop.count('.')
-        field_to_drop_depth = dict(sorted(field_to_drop_depth.items(), key=lambda x:x[1], reverse=True))
-        self.fields_to_drop = list(field_to_drop_depth.keys())
-        
+        self.fields_to_drop.sort(key=lambda x: x.count('.'), reverse=True)
+
         # Group fields_to_drop by shared direct parent.
         # The direct parents will be sorted by decreasing depth as fields_to_drop is sorted by decreasing depth.
         direct_parent_of_fields_to_drop = {}
@@ -95,9 +84,9 @@ class DropProcessor(AnyLevelCoreProcessor):
 
         # Will start with dropping field for the deepest parent.
         # While walking the tree for the deepest fields_to_drop will already drop the fields that share any ancestor.
-        while len(self.direct_parent_of_fields_to_drop.keys()) > 0:
-            deepest_remaining_parent = list(self.direct_parent_of_fields_to_drop.keys())[0]
-            first_child_of_deepest_remaining_parent = self.direct_parent_of_fields_to_drop[deepest_remaining_parent][0]
+        while self.direct_parent_of_fields_to_drop:
+            deepest_remaining_parent, children_of_deepest_remaining_parent = list(self.direct_parent_of_fields_to_drop.items())[0]
+            first_child_of_deepest_remaining_parent = children_of_deepest_remaining_parent[0]
             if deepest_remaining_parent == "ROOT":
                 column_to_process = first_child_of_deepest_remaining_parent
             else:
@@ -106,8 +95,7 @@ class DropProcessor(AnyLevelCoreProcessor):
             df = super().process(df)
             # TODO: Need to force calculation after x amount of drops ???
         return df
-        
-    
+
     def _process_field_with(self,
                              schema: StructType,
                              current_column_name: str,
@@ -117,13 +105,14 @@ class DropProcessor(AnyLevelCoreProcessor):
         # terminal operation reached. Two use-cases. Primitive array -> normal field
         if next is None:
             return self.apply_terminal_operation_on_structure(schema, current_column, current_column_name, previous)
-        
+
         # Already drop what can be dropped while walking the tree !
         col_name, _ = self.schema_util.parent_child_elements(previous)
-        if self.direct_parent_of_fields_to_drop.get(col_name):
-            current_column = current_column.dropFields(*self.direct_parent_of_fields_to_drop[col_name])
+        fields_to_drop_for_current_column = self.direct_parent_of_fields_to_drop.get(col_name)
+        if fields_to_drop_for_current_column:
+            current_column = current_column.dropFields(*fields_to_drop_for_current_column)
             # Do the cleanup
-            self.fields_to_drop = [x for x in self.fields_to_drop if x not in self.direct_parent_of_fields_to_drop[col_name]]
+            self.fields_to_drop = [x for x in self.fields_to_drop if x not in fields_to_drop_for_current_column]
             del self.direct_parent_of_fields_to_drop[col_name]
 
         return current_column.withField(f'`{current_column_name}`', self._process_field_recursive(
@@ -131,10 +120,9 @@ class DropProcessor(AnyLevelCoreProcessor):
             current_column_name=current_column_name,
             next=next,
             current_column=current_column,
-            previous=previous
-        ))
-    
-    
+            previous=previous)
+        )
+
     def apply_terminal_operation_on_structure(self,
                                               schema: StructType,
                                               column: Column,
@@ -143,7 +131,7 @@ class DropProcessor(AnyLevelCoreProcessor):
         # Previous is the full path to the field we want to fill while column_name is the last part of the name of this field
         # column can be the column corresponding with the parent of the field to fill
         # but can also be a transform / lambda combination applied to this parent.
-        
+
         col_name, _ = self.schema_util.parent_child_elements(previous)
         column = column.dropFields(*self.direct_parent_of_fields_to_drop[col_name])
         # Do the cleanup

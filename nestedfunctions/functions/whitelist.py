@@ -16,11 +16,6 @@ def whitelist(df: DataFrame, fields: List[str]) -> DataFrame:
 
 log = logging.getLogger(__name__)
 
-# https://issues.apache.org/jira/browse/SPARK-28090
-# Spark hangs when an execution plan has many projections on nested structs
-NUMBER_OF_ITERATIONS_TO_FORCE_CATALYST_FLUSH = 10
-SPARK_ENABLED_FORCE_RECALCULATION_ENV_VARIABLE_NAME = "SPARK_FORCE_RECALCULATION_ENABLED"
-
 
 class WhitelistProcessor(CoreProcessor):
     """Processor that selects only required fields.
@@ -31,19 +26,24 @@ class WhitelistProcessor(CoreProcessor):
 
       """
 
+    schema_util = SparkSchemaUtility()
+
     def __init__(self, whitelist_fields: List[str]):
         self.whitelist_fields = set(whitelist_fields)
-        self.schema_util = SparkSchemaUtility()
 
     def process(self, df: DataFrame) -> DataFrame:
-        if self.no_fields_to_select(df):
+        if self.no_fields_to_select(df, self.whitelist_fields):
             log.warning(
                 f"No fields to select {self.whitelist_fields}. No intersections with {self.schema_util.flatten_schema_include_parents_fields(df.schema)}. "
                 f"Returning empty df.")
             return df.limit(0)
-        fields_to_drop = WhitelistProcessor.find_fields_to_drop(
-            flattened_fields=set(SparkSchemaUtility().flatten_schema(df.schema)),
-            whitelist_fields=self.whitelist_fields)
+        fields_to_drop = (
+            WhitelistProcessor
+            .find_fields_to_drop(
+                flattened_fields=set(SparkSchemaUtility().flatten_schema(df.schema)),
+                whitelist_fields=self.whitelist_fields
+            )
+        )
         log.debug(f"Whitelisting {self.whitelist_fields} requires dropping {fields_to_drop}")
         return drop(df, fields_to_drop)
 
@@ -51,9 +51,10 @@ class WhitelistProcessor(CoreProcessor):
     def find_fields_to_drop(flattened_fields: Set[str], whitelist_fields: Set[str]) -> Set[str]:
         # If the parent is in the whitelist and some of the children are also in the whitelist, only the parent is kept.
         whitelist_fields = filter_only_parents_fields(whitelist_fields)
-        fields_to_drop = [field for field in flattened_fields if not
-                          WhitelistProcessor.is_field_or_ancestor_in_whitelist_fields(field=field,
-                                                                         whitelist_fields=whitelist_fields)]
+        fields_to_drop = [
+            field for field in flattened_fields if not
+            WhitelistProcessor.is_field_or_ancestor_in_whitelist_fields(field=field, whitelist_fields=whitelist_fields)
+        ]
         return fields_to_drop
 
     @staticmethod
@@ -65,13 +66,13 @@ class WhitelistProcessor(CoreProcessor):
                 return True
         return False
 
-    def no_fields_to_select(self, df: DataFrame) -> bool:
-        flattened_fields = set(self.schema_util.flatten_schema_include_parents_fields(df.schema))
-        if (flattened_fields - self.whitelist_fields) == flattened_fields:
+    @classmethod
+    def no_fields_to_select(cls, df: DataFrame, whitelist_fields: Set[str]) -> bool:
+        flattened_fields = set(cls.schema_util.flatten_schema_include_parents_fields(df.schema))
+        if (flattened_fields - whitelist_fields) == flattened_fields:
             return True
         else:
             return False
-
 
 def filter_only_parents_fields(fields: Set[str]) -> Set[str]:
     combinations = itertools.combinations(fields, 2)
