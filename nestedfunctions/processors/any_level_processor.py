@@ -25,7 +25,7 @@ class AnyLevelCoreProcessor(CoreProcessor):
             return self.apply_terminal_operation_on_root_level(df, root)
         else:
             return df.withColumn(root,
-                                 self.__process_field_recursive(schema=df.schema,
+                                 self._process_field_recursive(schema=df.schema,
                                                                 current_column_name=root,
                                                                 next=remaining,
                                                                 previous=root))
@@ -40,7 +40,7 @@ class AnyLevelCoreProcessor(CoreProcessor):
                                               previous: str) -> Column:
         raise NotImplemented("Not implemented. Must be overridden")
 
-    def __process_field_with(self,
+    def _process_field_with(self,
                              schema: StructType,
                              current_column_name: str,
                              next: str,
@@ -49,7 +49,7 @@ class AnyLevelCoreProcessor(CoreProcessor):
         # terminal operation reached. Two use-cases. Primitive array -> normal field
         if next is None:
             return self.apply_terminal_operation_on_structure(schema, current_column, current_column_name, previous)
-        return current_column.withField(f'`{current_column_name}`', self.__process_field_recursive(
+        return current_column.withField(f'`{current_column_name}`', self._process_field_recursive(
             schema=schema,
             current_column_name=current_column_name,
             next=next,
@@ -57,7 +57,7 @@ class AnyLevelCoreProcessor(CoreProcessor):
             previous=previous
         ))
 
-    def __process_field_recursive(self,
+    def _process_field_recursive(self,
                                   schema: StructType,
                                   current_column_name: str,
                                   next: str,
@@ -72,7 +72,7 @@ class AnyLevelCoreProcessor(CoreProcessor):
             # where non-root level must use 'current_column.getField'
             column = F.col(current_column_name) \
                 if self.__is_root_level_transformation(current_column) else current_column.getField(current_column_name)
-            return F.transform(column, lambda d: self.__process_field_with(schema=schema,
+            return F.transform(column, lambda d: self._process_field_with(schema=schema,
                                                                            current_column_name=head,
                                                                            next=tail,
                                                                            current_column=d,
@@ -84,7 +84,7 @@ class AnyLevelCoreProcessor(CoreProcessor):
             # Applying withField on NULL column will change the schema of the column but the column remains NULL.
             # If the column is a struct this behavior is undesired so we first fill the column with a struct that has NULL values for all of its fields.
             col = self.__fill_null_struct_with_null_fields(col, previous, schema)
-            return self.__process_field_with(schema=schema,
+            return self._process_field_with(schema=schema,
                                              current_column_name=head,
                                              next=tail,
                                              current_column=col,

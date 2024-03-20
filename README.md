@@ -93,12 +93,19 @@ date_formatted_df = format_date(
 
 #### Drop
 
-Recursively drop fields on any nested level.
+Recursively drop multiple fields at any nested level.
 
 ```python
 from nestedfunctions.functions.drop import drop
 
-dropped_df = drop(df, field="root_level.children1.children2")
+dropped_df = drop(
+      df,
+      fields_to_drop=[
+        "root_column.child1.grand_child2",
+        "root_column.child2",
+        "other_root_column",
+        ]
+  )
 ```
 
 #### Duplicate
