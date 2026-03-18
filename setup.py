@@ -46,11 +46,10 @@ setuptools.setup(
     package_data={
         "nestedfunctions": ["VERSION"]},
     include_package_data=True,
-    python_requires=">=3.7, <3.13",
+    python_requires=">=3.8, <3.13",
     install_requires=[REQUIREMENTS],
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
