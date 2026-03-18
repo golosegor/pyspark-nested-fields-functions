@@ -18,58 +18,70 @@ jobs:
           # The amount of valid python, spark, hadoop combinations is almost endless so we just focus on the LTS and new Databricks Runtime releases
           # https://docs.databricks.com/en/release-notes/runtime/index.html
 
-          # Lowest version allowed by setup.py and requirements.txt
-          - python: '3.7'
-            spark: '3.1.1'
-            hadoop: '2.7'
           # DBR 9.1 LTS
           - python: '3.8'
             spark: '3.1.2'
             hadoop: '2.7'
+            java: '8'
           # DBR 10.4 LTS
           - python: '3.8'
             spark: '3.2.1'
             hadoop: '3.2'
+            java: '8'
           # DBR 11.3 LTS
           - python: '3.9'
             spark: '3.3.0'
             hadoop: '3'
+            java: '8'
           # DBR 12.2 LTS
           - python: '3.9'
             spark: '3.3.2'
             hadoop: '3'
+            java: '8'
           # DBR 13.3 LTS
           - python: '3.10'
             spark: '3.4.1'
             hadoop: '3'
+            java: '8'
           # DBR 14.2
           - python: '3.10'
             spark: '3.5.0'
             hadoop: '3'
-          # Newer python versions which are not in DBR's yet
-          # (Python 3.12 is not supported on Spark 3.5.0)
+            java: '8'
           - python: '3.11'
             spark: '3.5.0'
             hadoop: '3'
+            java: '8'
+          # DBR 16.4 LTS
+          - python: '3.12'
+            spark: '3.5.2'
+            hadoop: '3'
+            java: '17'
+          # DBR 17.3 LTS
+          - python: '3.12'
+            spark: '4.0.0'
+            hadoop: '3'
+            java: '17'
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: Set up Python ${{ matrix.versions.python }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.versions.python }}
-    - uses: actions/setup-java@v1
+    - uses: actions/setup-java@v4
       with:
-        java-version: '8'
+        distribution: 'temurin'
+        java-version: ${{ matrix.versions.java }}
     - uses: vemonet/setup-spark@v1
       with:
         spark-version: ${{ matrix.versions.spark }}
         hadoop-version: ${{ matrix.versions.hadoop }}
     - name: Install pip
       run: python -m pip install --upgrade pip
-    - name: Install wheel
-      run: pip install wheel
+    - name: Install wheel and setuptools
+      run: pip install wheel setuptools
     - name: Install flake8
       run: python -m pip install flake8 pytest
     - name: Install dependencies
