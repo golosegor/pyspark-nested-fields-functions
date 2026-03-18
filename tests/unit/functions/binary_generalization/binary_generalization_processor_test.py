@@ -1,9 +1,11 @@
-import pkg_resources
+import os
 import pytest
 
 from nestedfunctions.functions.binary_generalization import binary_generalization
 from tests.unit.functions.spark_base_test import SparkBaseTest
 from tests.unit.utils.testing_utils import parse_df_sample
+
+FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
 
 
 class BinaryGeneralizationProcessorTest(SparkBaseTest):
@@ -29,12 +31,12 @@ class BinaryGeneralizationProcessorTest(SparkBaseTest):
         processed = binary_generalization(df, field="nonEmptyField")
         self.assertEqual(True, processed.collect()[0]["nonEmptyField"])
 
-    def test_binary_processor_factory_throw_exception_in_case_column_contains_illegal_charactes(self):
+    def test_binary_processor_factory_throw_exception_in_case_column_contains_illegal_charactes(
+            self):
         df = self.__parse_original_sample()
         with pytest.raises(Exception):
             binary_generalization(df, "field_name_with_illegal_character$")
 
     def __parse_original_sample(self):
-        return parse_df_sample(self.spark,
-                               pkg_resources.resource_filename(__name__,
-                                                               "fixtures/binary-generalization.json"))
+        return parse_df_sample(self.spark, os.path.join(
+            FIXTURES_DIR, "binary-generalization.json"))
