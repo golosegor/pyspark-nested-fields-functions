@@ -1,15 +1,13 @@
 import logging
 from typing import List, Dict
 
-import os
+import pkg_resources
 import pytest
 from pyspark.sql import DataFrame
 
 from nestedfunctions.functions.nullify import nullify, nullify_with_predicate
 from tests.unit.functions.spark_base_test import SparkBaseTest
 from tests.unit.utils.testing_utils import parse_df_sample
-
-FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
 
 log = logging.getLogger(__name__)
 
@@ -21,7 +19,7 @@ class NullabilityTest(SparkBaseTest):
             return [d[0] for d in df.select("creditCard").collect()]
 
         df = parse_df_sample(self.spark,
-                             os.path.join(FIXTURES_DIR, "nullify_sample.json"))
+                             pkg_resources.resource_filename(__name__, "fixtures/nullify_sample.json"))
         self.assertEqual(["value1", "value2"], parse_data(df))
         processed = nullify(df, field="creditCard")
         self.assertEqual([None, None], parse_data(processed))
@@ -31,11 +29,8 @@ class NullabilityTest(SparkBaseTest):
             custom_dimensions = df.select("customDimensions").collect()[0]
             return {r['index']: r['value'] for r in custom_dimensions[0]}
 
-        df = parse_df_sample(
-            self.spark,
-            os.path.join(
-                FIXTURES_DIR,
-                "nullify_with_predicate.json"))
+        df = parse_df_sample(self.spark,
+                             pkg_resources.resource_filename(__name__, "fixtures/nullify_with_predicate.json"))
         self.assertEqual({
             13: "(not set)",
             2: "normal-value"
@@ -49,12 +44,8 @@ class NullabilityTest(SparkBaseTest):
             2: "normal-value"
         }, parse_data(processed))
 
-    def test_nullify_processor_factory_throws_exception_if_field_is_invalid(
-            self):
-        df = parse_df_sample(
-            self.spark,
-            os.path.join(
-                FIXTURES_DIR,
-                "nullify_with_predicate.json"))
+    def test_nullify_processor_factory_throws_exception_if_field_is_invalid(self):
+        df = parse_df_sample(self.spark,
+                             pkg_resources.resource_filename(__name__, "fixtures/nullify_with_predicate.json"))
         with pytest.raises(Exception):
             nullify(df, "userId$")

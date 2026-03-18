@@ -26,28 +26,20 @@ MIN_INTEGER_VALUE = -2147483648
 MIN_BYTE_VALUE = -128
 DEFAULT_DECIMAL_TYPE = 0
 
-SPARK_TYPE_TO_REDACT_VALUE: Dict[AtomicType,
-                                 Any] = {StringType(): "_REDACTED_VALUE",
-                                         LongType(): -sys.maxsize,
-                                         BooleanType(): False,
-                                         DoubleType(): float(-sys.maxsize),
-                                         FloatType(): float(-sys.maxsize),
-                                         IntegerType(): MIN_INTEGER_VALUE,
-                                         ShortType(): MIN_SHORT_VALUE,
-                                         BinaryType(): bytearray(),
-                                         DateType(): datetime.date(year=1970,
-                                                                   month=1,
-                                                                   day=1),
-                                         TimestampType(): datetime.datetime(year=1970,
-                                                                            month=1,
-                                                                            day=1,
-                                                                            hour=0,
-                                                                            minute=0,
-                                                                            second=0,
-                                                                            microsecond=0),
-                                         ByteType(): MIN_BYTE_VALUE,
-                                         DecimalType(): 0,
-                                         }
+SPARK_TYPE_TO_REDACT_VALUE: Dict[AtomicType, Any] = {
+    StringType(): "_REDACTED_VALUE",
+    LongType(): -sys.maxsize,
+    BooleanType(): False,
+    DoubleType(): float(-sys.maxsize),
+    FloatType(): float(-sys.maxsize),
+    IntegerType(): MIN_INTEGER_VALUE,
+    ShortType(): MIN_SHORT_VALUE,
+    BinaryType(): bytearray(),
+    DateType(): datetime.date(year=1970, month=1, day=1),
+    TimestampType(): datetime.datetime(year=1970, month=1, day=1, hour=0, minute=0, second=0, microsecond=0),
+    ByteType(): MIN_BYTE_VALUE,
+    DecimalType(): 0,
+}
 
 
 def column_name_with_dedicated_field_type(fieldType: AtomicType) -> Column:
@@ -65,21 +57,16 @@ class RedactProcessor(TerminalOperationProcessor):
     def process(self, df: DataFrame) -> DataFrame:
         utility = SparkSchemaUtility()
         if not utility.does_column_exist(df.schema, self.column_to_process):
-            log.warning(
-                f"Column {self.column_to_process} does not exist. Ignoring redacting process")
+            log.warning(f"Column {self.column_to_process} does not exist. Ignoring redacting process")
             return df
-        field_type = utility.schema_for_field(
-            df.schema, self.column_to_process)
+        field_type = utility.schema_for_field(df.schema, self.column_to_process)
         if not issubclass(type(field_type), AtomicType):
             raise Exception(
                 f"Only primitive types could be redacted. Column ${self.column_to_process} has ${field_type} type. "
                 f"Expected primitive type")
         return super().process(df)
 
-    def transform_primitive(
-            self,
-            primitive_value: Column,
-            fieldType: AtomicType) -> Column:
+    def transform_primitive(self, primitive_value: Column, fieldType: AtomicType) -> Column:
         try:
             return F.when(F.isnull(primitive_value), primitive_value) \
                 .otherwise(column_name_with_dedicated_field_type(fieldType))

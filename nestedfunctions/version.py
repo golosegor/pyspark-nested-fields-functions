@@ -7,6 +7,6 @@ def string():
             version = fh.read().strip()
             if version:
                 return version
-    except BaseException:
+    except:
         pass
     return "unknown (git checkout)"
