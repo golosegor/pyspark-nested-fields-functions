@@ -7,8 +7,15 @@ from nestedfunctions.functions.terminal_operations import apply_terminal_operati
 
 
 def binary_generalization(df: DataFrame, field: str) -> DataFrame:
-    return apply_terminal_operation(df, field, lambda c, t: __binary_generalize(c))
+    return apply_terminal_operation(
+        df, field, lambda c, t: __binary_generalize(c))
 
 
 def __binary_generalize(primitive_column: Column) -> Column:
-    return (F.when(F.length(F.trim(primitive_column)) > 0, F.lit(True)).otherwise(F.lit(False))).cast(BooleanType())
+    return (
+        F.when(
+            F.length(
+                F.trim(primitive_column)) > 0,
+            F.lit(True)).otherwise(
+            F.lit(False))).cast(
+        BooleanType())

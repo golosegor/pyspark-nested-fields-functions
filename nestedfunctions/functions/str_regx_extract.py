@@ -6,12 +6,17 @@ from nestedfunctions.functions.terminal_operations import apply_terminal_operati
 from nestedfunctions.validation.validators import validate_regexp_or_throw
 
 
-def str_regx_extract(df: DataFrame, field: str, pattern: str, group_index_to_extract: int) -> DataFrame:
+def str_regx_extract(
+        df: DataFrame,
+        field: str,
+        pattern: str,
+        group_index_to_extract: int) -> DataFrame:
     validate_regexp_or_throw(pattern)
-    return apply_terminal_operation(df,
-                                    field,
-                                    lambda c, t: __extract(c, pattern, group_index_to_extract))
+    return apply_terminal_operation(
+        df, field, lambda c, t: __extract(
+            c, pattern, group_index_to_extract))
 
 
-def __extract(primitive_value: Column, pattern: str, group_index_to_extract: int) -> Column:
+def __extract(primitive_value: Column, pattern: str,
+              group_index_to_extract: int) -> Column:
     return F.regexp_extract(primitive_value, pattern, group_index_to_extract)

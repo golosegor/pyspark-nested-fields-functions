@@ -13,7 +13,7 @@ if "-" in remote_version:
     # pip has gotten strict with version numbers
     # so change it to: "1.3.3+22.git.gdf81228"
     # See: https://peps.python.org/pep-0440/#local-version-segments
-    v,i,s = remote_version.split("-")
+    v, i, s = remote_version.split("-")
     remote_version = v + "+" + i + ".git." + s
 
 assert "-" not in remote_version
@@ -29,7 +29,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 # this grabs the requirements from requirements.txt
 required_libs = {"pyspark"}
-REQUIREMENTS = [i.strip() for i in open("requirements.txt").readlines() if i.split("==")[0] in required_libs]
+REQUIREMENTS = [i.strip() for i in open(
+    "requirements.txt").readlines() if i.split("==")[0] in required_libs]
 
 
 setuptools.setup(
@@ -40,14 +41,13 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/golosegor/pyspark-nested-fields-functions",
-    packages=setuptools.find_packages(exclude=["tests"]),
-    package_data={"nestedfunctions": ["VERSION"]},
+    packages=setuptools.find_packages(
+        exclude=["tests"]),
+    package_data={
+        "nestedfunctions": ["VERSION"]},
     include_package_data=True,
-    # We make use of annotations which is only supported from python 3.7 onwards and Python 3.12 is not supported on Spark 3.5.0 yet
-    python_requires=">=3.7, <3.12",
-    install_requires=[
-        REQUIREMENTS
-    ],
+    python_requires=">=3.7, <3.13",
+    install_requires=[REQUIREMENTS],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
@@ -55,5 +55,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
 )

@@ -1,11 +1,13 @@
 import logging
 
-import pkg_resources
+import os
 
 from nestedfunctions.functions.field_rename import rename_with_strategy, FieldRenameFunc
 from nestedfunctions.spark_schema.utility import SparkSchemaUtility
 from tests.unit.functions.spark_base_test import SparkBaseTest
 from tests.unit.utils.testing_utils import parse_df_sample
+
+FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
 
 log = logging.getLogger(__name__)
 
@@ -14,15 +16,21 @@ class FieldRenameProcessorTest(SparkBaseTest):
 
     def test_field_name_could_be_renamed(self):
         utility = SparkSchemaUtility()
-        df = parse_df_sample(self.spark,
-                             pkg_resources.resource_filename(__name__, "fixtures/field_with_space.json"))
+        df = parse_df_sample(
+            self.spark,
+            os.path.join(
+                FIXTURES_DIR,
+                "field_with_space.json"))
         original_field_names = {
             'root field name with space',
             'root field name with space.id',
             'root field name with space.custom dimensions with space',
             'root field name with space.custom dimensions with space.nested value in the array with space',
         }
-        self.assertEqual(original_field_names, utility.flatten_schema_include_parents_fields(df.schema))
+        self.assertEqual(
+            original_field_names,
+            utility.flatten_schema_include_parents_fields(
+                df.schema))
         field_rename_strategy = AppendNameFn()
         processed = rename_with_strategy(df, field_rename_strategy)
         self.assertEqual({
